@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datasets | TruthLens AI</title>
+    <meta name="description" content="Browse and download curated deepfake detection datasets from Kaggle for model training and benchmarking.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{--font:'Nunito',sans-serif;--yellow:#f5b731;--yellow-light:#fff3cd;--yellow-dim:rgba(245,183,49,.12);--yellow-dark:#d4960a;--gold:#e8a317;--success:#4aba6a;--success-dim:rgba(74,186,106,.10);--danger:#e05555;--danger-dim:rgba(224,85,85,.10);--info:#5b9bd5;--info-dim:rgba(91,155,213,.10);--bg:#fdf8ef;--surface-0:#ffffff;--surface-1:#fffcf5;--surface-2:#faf5ea;--surface-3:#f3ecdb;--border:#f0e6d0;--border-hover:#e0d4b8;--text-primary:#2d2a24;--text-secondary:#6b6560;--text-muted:#a09888;--radius-sm:14px;--radius-md:20px;--radius-lg:28px;--radius-xl:36px;--shadow-soft:0 4px 24px rgba(200,180,130,.10);--shadow-card:0 8px 40px rgba(200,180,130,.12)}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
+        .bubble{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+        .bubble--1{width:300px;height:300px;background:radial-gradient(circle,rgba(245,183,49,.09),transparent 70%);top:-60px;right:-40px;animation:floatB 20s ease-in-out infinite alternate}
+        .bubble--2{width:220px;height:220px;background:radial-gradient(circle,rgba(232,163,23,.07),transparent 70%);bottom:8%;left:-50px;animation:floatB 17s ease-in-out infinite alternate-reverse}
+        @keyframes floatB{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.05)}100%{transform:translate(-10px,10px) scale(.97)}}
+        .page-wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:36px 20px 60px}
+
+        .navbar{width:100%;max-width:1000px;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--radius-xl);margin-bottom:40px;box-shadow:var(--shadow-soft)}
+        .navbar__brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:var(--text-primary)}
+        .navbar__logo{width:36px;height:36px;background:linear-gradient(135deg,var(--yellow),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 12px rgba(245,183,49,.25)}
+        .navbar__nav{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+        .navbar__nav a{padding:7px 14px;border-radius:99px;color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:700;transition:all .25s;border:1.5px solid transparent}
+        .navbar__nav a:hover{color:var(--text-primary);background:var(--surface-2)}
+        .navbar__nav a.active{color:var(--yellow-dark);background:var(--yellow-light);border-color:rgba(245,183,49,.3)}
+
+        .hero{text-align:center;margin-bottom:36px}
+        .hero__badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:var(--yellow-light);border:1.5px solid rgba(245,183,49,.3);border-radius:99px;font-size:11px;font-weight:800;color:var(--yellow-dark);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:18px}
+        .hero h1{font-size:clamp(28px,5vw,42px);font-weight:900;letter-spacing:-.5px;margin-bottom:10px}
+        .hero h1 .gradient-text{background:linear-gradient(135deg,var(--yellow),var(--gold),var(--yellow-dark));background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease-in-out infinite}
+        @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+        .hero p{font-size:14px;color:var(--text-secondary);max-width:520px;margin:0 auto}
+
+        .kaggle-status{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:700;margin-bottom:32px}
+        .kaggle-status--ok{background:var(--success-dim);color:var(--success);border:1.5px solid rgba(74,186,106,.25)}
+        .kaggle-status--missing{background:var(--danger-dim);color:var(--danger);border:1.5px solid rgba(224,85,85,.25)}
+        .kaggle-status .dot{width:8px;height:8px;border-radius:50%}
+        .kaggle-status--ok .dot{background:var(--success);box-shadow:0 0 8px var(--success)}
+        .kaggle-status--missing .dot{background:var(--danger);box-shadow:0 0 8px var(--danger)}
+
+        .datasets-grid{width:100%;max-width:1000px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+        .ds-card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all .3s;position:relative;overflow:hidden;box-shadow:var(--shadow-soft)}
+        .ds-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--yellow),transparent);opacity:0;transition:opacity .3s}
+        .ds-card:hover{border-color:var(--border-hover);transform:translateY(-4px);box-shadow:var(--shadow-card)}
+        .ds-card:hover::before{opacity:1}
+        .ds-card__icon{width:48px;height:48px;background:var(--yellow-dim);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--yellow-dark);margin-bottom:18px}
+        .ds-card__name{font-size:18px;font-weight:800;margin-bottom:8px}
+        .ds-card__desc{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px}
+        .ds-card__meta{display:flex;gap:16px;margin-bottom:18px}
+        .ds-card__meta-item{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
+        .ds-card__meta-item i{color:var(--yellow-dark);font-size:11px}
+        .ds-card__tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+        .tag{padding:4px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;font-size:11px;font-weight:700;color:var(--text-muted)}
+        .ds-card__actions{display:flex;gap:8px}
+        .ds-btn{flex:1;font-family:var(--font);padding:10px 14px;font-size:13px;font-weight:800;border-radius:var(--radius-sm);border:1.5px solid var(--border);cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:6px}
+        .ds-btn--download{background:var(--yellow-dim);color:var(--yellow-dark);border-color:rgba(245,183,49,.25)}
+        .ds-btn--download:hover{background:linear-gradient(135deg,var(--yellow),var(--gold));color:#fff;box-shadow:0 4px 16px rgba(245,183,49,.3)}
+        .ds-btn--benchmark{background:var(--success-dim);color:var(--success);border-color:rgba(74,186,106,.25)}
+        .ds-btn--benchmark:hover{background:var(--success);color:white;box-shadow:0 4px 16px rgba(74,186,106,.3)}
+        .ds-btn--downloaded{background:var(--surface-2);color:var(--success);border-color:rgba(74,186,106,.25);cursor:default}
+        .ds-btn:disabled{opacity:.5;cursor:not-allowed}
+
+        .toast{position:fixed;bottom:30px;right:30px;padding:16px 24px;border-radius:var(--radius-md);font-size:14px;font-weight:700;z-index:1000;transform:translateY(100px);opacity:0;transition:all .4s}
+        .toast.show{transform:translateY(0);opacity:1}
+        .toast--success{background:var(--success-dim);color:var(--success);border:1.5px solid rgba(74,186,106,.3)}
+        .toast--error{background:var(--danger-dim);color:var(--danger);border:1.5px solid rgba(224,85,85,.3)}
+        .toast--info{background:var(--info-dim);color:var(--info);border:1.5px solid rgba(91,155,213,.3)}
+
+        .setup-card{width:100%;max-width:600px;background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:32px;margin-bottom:36px;box-shadow:var(--shadow-soft)}
+        .setup-card h3{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+        .setup-card h3 i{color:var(--yellow)}
+        .setup-card ol{padding-left:20px;color:var(--text-secondary);font-size:13px;line-height:2}
+        .setup-card code{background:var(--surface-2);padding:2px 8px;border-radius:8px;font-size:12px;color:var(--yellow-dark)}
+
+        .footer{margin-top:48px;text-align:center;color:var(--text-muted);font-size:12px}
+        .footer span{color:var(--yellow-dark)}
+        @media(max-width:640px){.navbar{padding:10px 16px}.navbar__nav a{padding:5px 9px;font-size:11px}.datasets-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="bubble bubble--1"></div><div class="bubble bubble--2"></div>
+<div class="page-wrapper">
+    <nav class="navbar" id="navbar">
+        <a href="/" class="navbar__brand"><div class="navbar__logo">🔍</div><span>TruthLens<span style="color:var(--yellow-dark)">AI</span></span></a>
+        <div class="navbar__nav">
+            <a href="/"><i class="fa-solid fa-shield-halved"></i> Detect</a>
+            <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+            <a href="/emotion"><i class="fa-solid fa-face-smile"></i> Emotion</a>
+            <a href="/age"><i class="fa-solid fa-user-clock"></i> Age</a>
+            <a href="/video-analysis"><i class="fa-solid fa-video"></i> Video</a>
+            <a href="/datasets" class="active"><i class="fa-solid fa-database"></i> Datasets</a>
+            <a href="/events"><i class="fa-solid fa-chart-line"></i> Events</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="hero__badge"><i class="fa-brands fa-kaggle"></i> Kaggle Integration</div>
+        <h1>Deepfake <span class="gradient-text">Datasets</span></h1>
+        <p>Browse curated datasets from Kaggle. Download them and benchmark your model's accuracy, precision, and recall.</p>
+    </section>
+
+    {% if kaggle_ready %}
+    <div class="kaggle-status kaggle-status--ok"><span class="dot"></span> Kaggle API Connected</div>
+    {% else %}
+    <div class="kaggle-status kaggle-status--missing"><span class="dot"></span> Kaggle API Not Configured</div>
+    <div class="setup-card">
+        <h3><i class="fa-solid fa-gear"></i> Setup Instructions</h3>
+        <ol>
+            <li>Go to <a href="https://www.kaggle.com/settings" target="_blank" style="color:var(--yellow-dark)">kaggle.com/settings</a></li>
+            <li>Click <strong>"Create New Token"</strong> to download <code>kaggle.json</code></li>
+            <li>Place it in <code>C:\Users\&lt;you&gt;\.kaggle\kaggle.json</code></li>
+            <li>Restart the app and you're ready!</li>
+        </ol>
+    </div>
+    {% endif %}
+
+    <div class="datasets-grid">
+        {% for ds in datasets %}
+        <div class="ds-card" id="ds-card-{{ loop.index }}">
+            <div class="ds-card__icon"><i class="fa-solid {{ ds.icon }}"></i></div>
+            <div class="ds-card__name">{{ ds.name }}</div>
+            <div class="ds-card__desc">{{ ds.description }}</div>
+            <div class="ds-card__meta">
+                <div class="ds-card__meta-item"><i class="fa-solid fa-hard-drive"></i> {{ ds.size }}</div>
+                <div class="ds-card__meta-item"><i class="fa-solid fa-image"></i> {{ ds.samples }}</div>
+            </div>
+            <div class="ds-card__tags">{% for tag in ds.tags %}<span class="tag">{{ tag }}</span>{% endfor %}</div>
+            <div class="ds-card__actions">
+                {% if ds.downloaded %}
+                <button class="ds-btn ds-btn--downloaded" disabled><i class="fa-solid fa-circle-check"></i> Downloaded</button>
+                <button class="ds-btn ds-btn--benchmark" onclick="benchmarkDataset('{{ ds.slug }}', this)"><i class="fa-solid fa-flask"></i> Benchmark</button>
+                {% else %}
+                <button class="ds-btn ds-btn--download" onclick="downloadDataset('{{ ds.slug }}', this)" {% if not kaggle_ready %}disabled{% endif %}><i class="fa-solid fa-download"></i> Download</button>
+                <button class="ds-btn ds-btn--benchmark" disabled><i class="fa-solid fa-flask"></i> Benchmark</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="footer">Built with <span>♥</span> by Kartik Singh &middot; Powered by Kaggle + HuggingFace</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function showToast(message,type='info'){const toast=document.getElementById('toast');toast.className='toast toast--'+type;toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),4000)}
+async function downloadDataset(slug,btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Downloading...';showToast('Starting download — this may take a while...','info');try{const formData=new FormData();formData.append('slug',slug);const resp=await fetch('/datasets/download',{method:'POST',body:formData});const data=await resp.json();if(data.success){showToast(data.message,'success');btn.innerHTML='<i class="fa-solid fa-circle-check"></i> Downloaded';btn.className='ds-btn ds-btn--downloaded';const benchBtn=btn.parentElement.querySelector('.ds-btn--benchmark');if(benchBtn){benchBtn.disabled=false;benchBtn.onclick=()=>benchmarkDataset(slug,benchBtn)}}else{showToast(data.message,'error');btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-download"></i> Download'}}catch(e){showToast('Network error: '+e.message,'error');btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-download"></i> Download'}}
+async function benchmarkDataset(slug,btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Running...';showToast('Benchmarking model — please wait...','info');try{const formData=new FormData();formData.append('slug',slug);const resp=await fetch('/datasets/benchmark',{method:'POST',body:formData});const data=await resp.json();if(data.success){showToast(`Accuracy: ${data.accuracy}% | F1: ${data.f1_score}%`,'success');btn.innerHTML=`<i class="fa-solid fa-flask"></i> ${data.accuracy}%`}else{showToast(data.message,'error')}btn.disabled=false}catch(e){showToast('Benchmark error: '+e.message,'error');btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-flask"></i> Benchmark'}}
+</script>
+</body>
+</html>

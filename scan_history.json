@@ -1,0 +1,413 @@
+[
+    {
+        "type": "deepfake",
+        "filename": "fad9398d-09af-4085-bcd9-2c9860bc2b2f.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.9186365008354187,
+        "timestamp": "2026-03-27T14:12:31.288685",
+        "id": 1
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "happy",
+        "confidence": 0.7011,
+        "deception_score": 0,
+        "timestamp": "2026-03-27T14:14:08.359430",
+        "id": 2
+    },
+    {
+        "type": "age",
+        "estimated_age": 3,
+        "age_group": "child",
+        "confidence": 0.674,
+        "is_minor": true,
+        "timestamp": "2026-03-27T14:15:40.467603",
+        "id": 3
+    },
+    {
+        "type": "deepfake",
+        "filename": "cc0d99e9-c462-4da8-95ad-5e81aea347f7.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9458834528923035,
+        "timestamp": "2026-03-27T14:40:38.524424",
+        "id": 4
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "surprise",
+        "confidence": 0.5581,
+        "deception_score": 0,
+        "timestamp": "2026-03-27T14:59:34.466085",
+        "id": 5
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "surprise",
+        "confidence": 0.8301000000000001,
+        "deception_score": 0,
+        "timestamp": "2026-03-27T14:59:52.991056",
+        "id": 6
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "surprise",
+        "confidence": 0.7112999999999999,
+        "deception_score": 0,
+        "timestamp": "2026-03-27T15:00:06.229100",
+        "id": 7
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "surprise",
+        "confidence": 0.8223999999999999,
+        "deception_score": 48.8,
+        "timestamp": "2026-03-27T15:02:01.165630",
+        "id": 8
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "surprise",
+        "confidence": 0.8223999999999999,
+        "deception_score": 48.8,
+        "timestamp": "2026-03-27T15:02:12.544353",
+        "id": 9
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "surprise",
+        "confidence": 0.8223999999999999,
+        "deception_score": 48.8,
+        "timestamp": "2026-03-27T15:02:46.191100",
+        "id": 10
+    },
+    {
+        "type": "age",
+        "estimated_age": 3,
+        "age_group": "child",
+        "confidence": 0.6765000000000001,
+        "is_minor": true,
+        "timestamp": "2026-03-27T15:03:51.699324",
+        "id": 11
+    },
+    {
+        "type": "deepfake",
+        "filename": "28561510-8934-4952-809f-33092e9bdd65.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.5756516456604004,
+        "timestamp": "2026-03-27T15:04:32.759518",
+        "id": 12
+    },
+    {
+        "type": "deepfake",
+        "filename": "cc786c1b-7d9c-4a2a-88af-1b255cff5832.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.7533490657806396,
+        "timestamp": "2026-03-27T15:18:37.023839",
+        "id": 13
+    },
+    {
+        "type": "deepfake",
+        "filename": "7a67dac3-1834-4959-b717-1dc258e7b345.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.8059355616569519,
+        "timestamp": "2026-03-27T15:29:45.409143",
+        "id": 14
+    },
+    {
+        "type": "deepfake",
+        "filename": "f8cc281d-cb8c-4236-80ce-cd979e3fe344.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.5305219888687134,
+        "timestamp": "2026-03-27T15:30:11.288444",
+        "id": 15
+    },
+    {
+        "type": "deepfake",
+        "filename": "751a5f98-d363-462a-b8d7-23341ea167b9.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9926639795303345,
+        "timestamp": "2026-03-27T15:38:14.754624",
+        "id": 16
+    },
+    {
+        "type": "deepfake",
+        "filename": "38f7827f-f8d1-4274-a6d6-4e953f6ab0c7.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9543365836143494,
+        "timestamp": "2026-03-27T15:39:08.487437",
+        "id": 17
+    },
+    {
+        "type": "deepfake",
+        "filename": "30b70f03-65ed-4279-81d9-a9dd0f07bec8.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9795979857444763,
+        "timestamp": "2026-03-27T15:39:28.806130",
+        "id": 18
+    },
+    {
+        "type": "deepfake",
+        "filename": "9b05e037-7de5-4bf4-a2fc-af699798b240.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9655698537826538,
+        "timestamp": "2026-03-27T15:40:00.681562",
+        "id": 19
+    },
+    {
+        "type": "deepfake",
+        "filename": "96a9a649-3368-4b4d-b2f0-5266205477d0.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.8922961354255676,
+        "timestamp": "2026-03-27T15:40:20.287337",
+        "id": 20
+    },
+    {
+        "type": "deepfake",
+        "filename": "c2925856-2c48-412b-be0e-7317204f8aaa.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.7516998648643494,
+        "timestamp": "2026-03-27T15:40:32.410544",
+        "id": 21
+    },
+    {
+        "type": "deepfake",
+        "filename": "a32c5bc9-ff71-4d8f-ac46-ad555d3ad2cc.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9808721542358398,
+        "timestamp": "2026-03-27T15:40:54.327894",
+        "id": 22
+    },
+    {
+        "type": "deepfake",
+        "filename": "c7192d65-4dd7-4887-a694-32eda0d98d4f.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.7504273653030396,
+        "timestamp": "2026-03-27T15:41:03.203148",
+        "id": 23
+    },
+    {
+        "type": "deepfake",
+        "filename": "fc911f48-1415-45ca-8dba-1e9f08f30f4b.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.6831109523773193,
+        "timestamp": "2026-03-27T15:41:29.186242",
+        "id": 24
+    },
+    {
+        "type": "deepfake",
+        "filename": "98824105-c9f7-4d43-a30e-f7cdcefa81d7.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.6861146688461304,
+        "timestamp": "2026-03-27T15:42:01.697615",
+        "id": 25
+    },
+    {
+        "type": "deepfake",
+        "filename": "6a7363a3-6bda-4453-afc1-592546e1b1a7.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.6239034533500671,
+        "timestamp": "2026-03-27T15:42:23.184031",
+        "id": 26
+    },
+    {
+        "type": "deepfake",
+        "filename": "4ddc4e31-6f76-4463-bcb5-fa2f3f76a68b.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9265099167823792,
+        "timestamp": "2026-03-27T15:42:53.670626",
+        "id": 27
+    },
+    {
+        "type": "deepfake",
+        "filename": "d095d553-40ab-4b4a-8414-bc7525cd154b.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.7017928957939148,
+        "timestamp": "2026-03-27T15:44:06.428814",
+        "id": 28
+    },
+    {
+        "type": "deepfake",
+        "filename": "03ae03d5-4093-447c-b04c-815271f6aca6.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.7017928957939148,
+        "timestamp": "2026-03-27T15:44:22.422504",
+        "id": 29
+    },
+    {
+        "type": "deepfake",
+        "filename": "d2b519c5-8199-4a01-8287-89a6e511434e.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9954487681388855,
+        "timestamp": "2026-03-27T15:47:22.000747",
+        "id": 30
+    },
+    {
+        "type": "deepfake",
+        "filename": "19fb1835-3122-4ac9-b529-b5c1c8f3ad67.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.5512312650680542,
+        "timestamp": "2026-03-27T15:47:51.114172",
+        "id": 31
+    },
+    {
+        "type": "deepfake",
+        "filename": "09ef5466-8656-4143-bc13-11e0e92ffc9a.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.5877941846847534,
+        "timestamp": "2026-03-27T15:48:18.702448",
+        "id": 32
+    },
+    {
+        "type": "deepfake",
+        "filename": "727a9e6f-89dd-489c-a68a-dbba17609d26.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9926639795303345,
+        "timestamp": "2026-03-27T15:49:47.957345",
+        "id": 33
+    },
+    {
+        "type": "deepfake",
+        "filename": "0ab4c303-bba7-4364-99b2-e25d5ad27b2f.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.523605465888977,
+        "timestamp": "2026-03-27T15:49:54.783368",
+        "id": 34
+    },
+    {
+        "type": "deepfake",
+        "filename": "c4c32d10-d046-4846-8531-710008ba4d3d.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.9926639795303345,
+        "timestamp": "2026-03-27T15:50:17.119554",
+        "id": 35
+    },
+    {
+        "type": "age",
+        "estimated_age": 24,
+        "age_group": "young_adult",
+        "confidence": 0.674,
+        "is_minor": false,
+        "timestamp": "2026-03-27T16:00:23.091071",
+        "id": 36
+    },
+    {
+        "type": "age",
+        "estimated_age": 43,
+        "age_group": "adult",
+        "confidence": 0.6855,
+        "is_minor": false,
+        "timestamp": "2026-03-27T16:00:42.803448",
+        "id": 37
+    },
+    {
+        "type": "deepfake",
+        "filename": "769582b3-2866-4fe2-b611-d9b885986f9b.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.5788257718086243,
+        "timestamp": "2026-03-27T16:03:53.607227",
+        "id": 38
+    },
+    {
+        "type": "deepfake",
+        "filename": "360a2c61-cd14-4508-8284-93bd4c9ca4d6.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.8945127129554749,
+        "timestamp": "2026-03-27T16:04:17.762452",
+        "id": 39
+    },
+    {
+        "type": "deepfake",
+        "filename": "a5d43654-b019-4da5-b393-b48d454ea63d.jpg",
+        "result": "DEEPFAKE IMAGE",
+        "confidence": 0.5752048492431641,
+        "timestamp": "2026-03-27T16:04:46.831407",
+        "id": 40
+    },
+    {
+        "type": "age",
+        "estimated_age": 24,
+        "age_group": "young_adult",
+        "confidence": 0.8332999999999999,
+        "is_minor": false,
+        "timestamp": "2026-03-27T16:06:37.338907",
+        "id": 41
+    },
+    {
+        "type": "age",
+        "estimated_age": 34,
+        "age_group": "young_adult",
+        "confidence": 0.3713,
+        "is_minor": false,
+        "timestamp": "2026-03-27T16:06:58.300073",
+        "id": 42
+    },
+    {
+        "type": "age",
+        "estimated_age": 28,
+        "age_group": "young_adult",
+        "confidence": 0.4168,
+        "is_minor": false,
+        "timestamp": "2026-03-27T16:07:06.528148",
+        "id": 43
+    },
+    {
+        "type": "age",
+        "estimated_age": 30,
+        "age_group": "young_adult",
+        "confidence": 0.5367000000000001,
+        "is_minor": false,
+        "timestamp": "2026-03-27T16:07:19.150177",
+        "id": 44
+    },
+    {
+        "type": "age",
+        "estimated_age": 28,
+        "age_group": "young_adult",
+        "confidence": 0.5428000000000001,
+        "is_minor": false,
+        "timestamp": "2026-03-27T16:07:33.382442",
+        "id": 45
+    },
+    {
+        "type": "deepfake",
+        "filename": "6dd3ef99-b206-4970-aec5-018fb049c8df.jpg",
+        "result": "REAL IMAGE",
+        "confidence": 0.7390684485435486,
+        "timestamp": "2026-03-27T20:30:15.779779",
+        "id": 46
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "sad",
+        "confidence": 0.5834,
+        "deception_score": 0,
+        "timestamp": "2026-03-27T20:31:36.744626",
+        "id": 47
+    },
+    {
+        "type": "emotion",
+        "primary_emotion": "sad",
+        "confidence": 0.5834,
+        "deception_score": 0,
+        "timestamp": "2026-03-27T20:32:04.243750",
+        "id": 48
+    },
+    {
+        "type": "age",
+        "estimated_age": 43,
+        "age_group": "adult",
+        "confidence": 0.6795,
+        "is_minor": false,
+        "timestamp": "2026-03-27T20:32:31.726900",
+        "id": 49
+    },
+    {
+        "type": "age",
+        "estimated_age": 29,
+        "age_group": "young_adult",
+        "confidence": 0.39880000000000004,
+        "is_minor": false,
+        "timestamp": "2026-03-27T20:32:55.267547",
+        "id": 50
+    }
+]

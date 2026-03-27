@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detector | TruthLens AI</title>
+    <meta name="description" content="AI-powered micro-expression analysis and emotion detection.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{--font:'Nunito',sans-serif;--yellow:#f5b731;--yellow-light:#fff3cd;--yellow-dim:rgba(245,183,49,.12);--yellow-dark:#d4960a;--gold:#e8a317;--success:#4aba6a;--success-dim:rgba(74,186,106,.10);--danger:#e05555;--danger-dim:rgba(224,85,85,.10);--bg:#fdf8ef;--surface-0:#ffffff;--surface-1:#fffcf5;--surface-2:#faf5ea;--surface-3:#f3ecdb;--border:#f0e6d0;--border-hover:#e0d4b8;--text-primary:#2d2a24;--text-secondary:#6b6560;--text-muted:#a09888;--radius-sm:14px;--radius-md:20px;--radius-lg:28px;--radius-xl:36px;--shadow-soft:0 4px 24px rgba(200,180,130,.10);--shadow-card:0 8px 40px rgba(200,180,130,.12)}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
+        .bubble{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+        .bubble--1{width:300px;height:300px;background:radial-gradient(circle,rgba(245,183,49,.09),transparent 70%);top:-60px;left:-40px;animation:floatB 18s ease-in-out infinite alternate}
+        .bubble--2{width:200px;height:200px;background:radial-gradient(circle,rgba(232,163,23,.07),transparent 70%);bottom:5%;right:-30px;animation:floatB 22s ease-in-out infinite alternate-reverse}
+        @keyframes floatB{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.05)}100%{transform:translate(-10px,10px) scale(.97)}}
+        .page-wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:36px 20px 60px}
+        .navbar{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--radius-xl);margin-bottom:36px;box-shadow:var(--shadow-soft)}
+        .navbar__brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:var(--text-primary)}
+        .navbar__logo{width:36px;height:36px;background:linear-gradient(135deg,var(--yellow),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 12px rgba(245,183,49,.25)}
+        .navbar__nav{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+        .navbar__nav a{padding:7px 14px;border-radius:99px;color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:700;transition:all .25s;border:1.5px solid transparent}
+        .navbar__nav a:hover{color:var(--text-primary);background:var(--surface-2)}
+        .navbar__nav a.active{color:var(--yellow-dark);background:var(--yellow-light);border-color:rgba(245,183,49,.3)}
+        .hero{text-align:center;margin-bottom:32px}
+        .hero__badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:var(--yellow-light);border:1.5px solid rgba(245,183,49,.3);border-radius:99px;font-size:11px;font-weight:800;color:var(--yellow-dark);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+        .hero h1{font-size:clamp(24px,4.5vw,36px);font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
+        .hero p{font-size:14px;color:var(--text-secondary);max-width:480px;margin:0 auto}
+        .content{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:860px}
+        .upload-card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-card)}
+        .upload-zone{border:2px dashed var(--border-hover);border-radius:var(--radius-md);padding:34px 20px;cursor:pointer;transition:all .3s;background:var(--surface-1);text-align:center;margin-bottom:18px;position:relative}
+        .upload-zone:hover{border-color:var(--yellow);background:var(--yellow-dim)}
+        .upload-zone__icon{width:50px;height:50px;margin:0 auto 12px;background:var(--yellow-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--yellow-dark)}
+        .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+        .upload-zone__title{font-size:14px;font-weight:700}
+        .upload-zone__sub{font-size:11px;color:var(--text-muted);margin-top:4px}
+        .preview-box{border-radius:var(--radius-md);overflow:hidden;border:1.5px solid var(--border);margin-bottom:18px;display:none}
+        .preview-box.visible{display:block}
+        .preview-box img{width:100%;display:block}
+        .btn-analyze{width:100%;padding:12px;font-family:var(--font);font-size:14px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--yellow),var(--gold));border:none;border-radius:var(--radius-md);cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:.5px;box-shadow:0 4px 16px rgba(245,183,49,.3)}
+        .btn-analyze:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,183,49,.35)}
+        .mode-tabs{display:flex;gap:6px;margin-bottom:18px}
+        .mode-tab{flex:1;font-family:var(--font);padding:9px;font-size:12px;font-weight:700;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;transition:all .2s;text-align:center}
+        .mode-tab.active{background:var(--yellow-light);color:var(--yellow-dark);border-color:rgba(245,183,49,.3)}
+        .webcam-box{border-radius:var(--radius-md);overflow:hidden;border:1.5px solid var(--border);margin-bottom:18px;position:relative;display:none}
+        .webcam-box.visible{display:block}
+        .webcam-box video{width:100%;display:block}
+        .webcam-overlay{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+        .webcam-btn{font-family:var(--font);padding:8px 16px;font-size:12px;font-weight:800;border-radius:99px;border:none;cursor:pointer;transition:all .2s}
+        .webcam-btn--capture{background:var(--yellow);color:#fff}
+        .webcam-btn--stop{background:var(--danger);color:white}
+        .result-card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-card)}
+        .primary-emotion{text-align:center;margin-bottom:24px}
+        .primary-emotion__emoji{font-size:56px;margin-bottom:10px;display:block}
+        .primary-emotion__label{font-size:22px;font-weight:900;text-transform:capitalize}
+        .primary-emotion__conf{font-size:13px;color:var(--text-secondary);margin-top:4px}
+        .emotion-bar{margin-bottom:12px}
+        .emotion-bar__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+        .emotion-bar__label{font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px}
+        .emotion-bar__score{font-size:12px;font-weight:800}
+        .emotion-bar__track{height:7px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+        .emotion-bar__fill{height:100%;border-radius:99px;transition:width .8s ease}
+        .deception-alert{margin-top:20px;padding:14px;border-radius:var(--radius-md);display:flex;align-items:center;gap:10px}
+        .deception-alert--low{background:var(--success-dim);border:1.5px solid rgba(74,186,106,.2);color:var(--success)}
+        .deception-alert--high{background:var(--danger-dim);border:1.5px solid rgba(224,85,85,.2);color:var(--danger)}
+        .deception-alert__icon{font-size:18px}
+        .deception-alert__text{font-size:12px;font-weight:700}
+        .result-placeholder{text-align:center;padding:70px 20px;color:var(--text-muted)}
+        .result-placeholder i{font-size:40px;display:block;margin-bottom:14px;opacity:.3}
+        .footer{margin-top:48px;text-align:center;color:var(--text-muted);font-size:12px;width:100%}
+        .footer span{color:var(--yellow-dark)}
+        @media(max-width:768px){.content{grid-template-columns:1fr}.navbar__nav a{padding:5px 9px;font-size:11px}}
+    </style>
+</head>
+<body>
+<div class="bubble bubble--1"></div><div class="bubble bubble--2"></div>
+<div class="page-wrapper">
+    <nav class="navbar">
+        <a href="/" class="navbar__brand"><div class="navbar__logo">🔍</div><span>TruthLens<span style="color:var(--yellow-dark)">AI</span></span></a>
+        <div class="navbar__nav">
+            <a href="/"><i class="fa-solid fa-shield-halved"></i> Detect</a>
+            <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+            <a href="/emotion" class="active"><i class="fa-solid fa-face-smile"></i> Emotion</a>
+            <a href="/age"><i class="fa-solid fa-user-clock"></i> Age</a>
+            <a href="/video-analysis"><i class="fa-solid fa-video"></i> Video</a>
+            <a href="/datasets"><i class="fa-solid fa-database"></i> Datasets</a>
+            <a href="/events"><i class="fa-solid fa-chart-line"></i> Events</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="hero__badge"><i class="fa-solid fa-brain"></i> Micro-Expression Analysis</div>
+        <h1>Emotion Detector</h1>
+        <p>Identify micro-expressions in real time. Supports 7 emotion classes plus deception cue analysis.</p>
+    </section>
+    <div class="content">
+        <div class="upload-card">
+            <div class="mode-tabs">
+                <button class="mode-tab active" id="tabUpload" onclick="switchMode('upload')"><i class="fa-solid fa-upload"></i> Upload</button>
+                <button class="mode-tab" id="tabWebcam" onclick="switchMode('webcam')"><i class="fa-solid fa-camera"></i> Webcam</button>
+            </div>
+            <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-zone__icon"><i class="fa-solid fa-face-smile-wink"></i></div>
+                    <div class="upload-zone__title">Drop a face image</div>
+                    <div class="upload-zone__sub">JPG, PNG &middot; Best with close-up faces</div>
+                    <input type="file" name="image" accept="image/*" onchange="previewImage(event)" id="fileInput">
+                </div>
+                <div class="preview-box" id="previewBox"><img id="preview" src="" alt="Preview"></div>
+                <button type="submit" class="btn-analyze" id="btnAnalyze"><i class="fa-solid fa-brain"></i> Detect Emotions</button>
+            </form>
+            <div class="webcam-box" id="webcamBox">
+                <video id="webcamVideo" autoplay playsinline></video>
+                <div class="webcam-overlay">
+                    <button class="webcam-btn webcam-btn--capture" onclick="captureWebcam()"><i class="fa-solid fa-camera"></i> Capture</button>
+                    <button class="webcam-btn webcam-btn--stop" onclick="stopWebcam()"><i class="fa-solid fa-stop"></i></button>
+                </div>
+            </div>
+            <canvas id="webcamCanvas" style="display:none"></canvas>
+        </div>
+        <div class="result-card">
+            {% if result %}
+            <div class="primary-emotion">
+                <span class="primary-emotion__emoji">{{ result.primary_emoji }}</span>
+                <div class="primary-emotion__label" style="color:{{ result.primary_color }}">{{ result.primary_emotion }}</div>
+                <div class="primary-emotion__conf">{{ result.confidence }}% confidence</div>
+            </div>
+            {% for e in result.all_emotions %}
+            <div class="emotion-bar"><div class="emotion-bar__header"><span class="emotion-bar__label"><span>{{ e.emoji }}</span> {{ e.label|capitalize }}</span><span class="emotion-bar__score" style="color:{{ e.color }}">{{ e.score }}%</span></div><div class="emotion-bar__track"><div class="emotion-bar__fill" style="width:{{ e.score }}%;background:{{ e.color }}" id="ebar-{{ loop.index }}"></div></div></div>
+            {% endfor %}
+            <div class="deception-alert deception-alert--{% if result.deception_score > 30 %}high{% else %}low{% endif %}">
+                <span class="deception-alert__icon">{% if result.deception_score > 30 %}⚠️{% else %}✅{% endif %}</span>
+                <span class="deception-alert__text">Deception Cue Score: {{ result.deception_score }}% {% if result.deception_score > 30 %} — Elevated stress patterns{% else %} — No significant deception cues{% endif %}</span>
+            </div>
+            {% else %}
+            <div class="result-placeholder"><i class="fa-solid fa-face-meh"></i><p>Upload or capture a face image to begin emotion analysis.</p></div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="footer">Built with <span>♥</span> by Kartik Singh &middot; Powered by ViT Face Expression Model</div>
+</div>
+<script>
+let webcamStream=null;
+function previewImage(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{document.getElementById('preview').src=ev.target.result;document.getElementById('previewBox').classList.add('visible');document.getElementById('uploadZone').style.display='none'};r.readAsDataURL(f)}
+function switchMode(mode){document.getElementById('tabUpload').classList.toggle('active',mode==='upload');document.getElementById('tabWebcam').classList.toggle('active',mode==='webcam');document.getElementById('uploadForm').style.display=mode==='upload'?'block':'none';document.getElementById('webcamBox').classList.toggle('visible',mode==='webcam');if(mode==='webcam')startWebcam();else stopWebcam()}
+async function startWebcam(){try{webcamStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});document.getElementById('webcamVideo').srcObject=webcamStream}catch(e){alert('Camera access denied')}}
+function stopWebcam(){if(webcamStream){webcamStream.getTracks().forEach(t=>t.stop());webcamStream=null}document.getElementById('webcamBox').classList.remove('visible')}
+async function captureWebcam(){const video=document.getElementById('webcamVideo');const canvas=document.getElementById('webcamCanvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d').drawImage(video,0,0);const imageData=canvas.toDataURL('image/jpeg');try{const resp=await fetch('/api/emotion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_data:imageData})});const data=await resp.json();if(data.primary_emotion)location.reload()}catch(e){alert('Error: '+e.message)}}
+window.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.emotion-bar__fill').forEach(b=>{const w=b.style.width;b.style.width='0%';setTimeout(()=>{b.style.width=w},200)})});
+</script>
+</body>
+</html>

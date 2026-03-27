@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events | TruthLens AI</title>
+    <meta name="description" content="Real-time event streaming dashboard powered by Apache Kafka.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{--font:'Nunito',sans-serif;--yellow:#f5b731;--yellow-light:#fff3cd;--yellow-dim:rgba(245,183,49,.12);--yellow-dark:#d4960a;--gold:#e8a317;--success:#4aba6a;--success-dim:rgba(74,186,106,.10);--danger:#e05555;--danger-dim:rgba(224,85,85,.10);--info:#5b9bd5;--info-dim:rgba(91,155,213,.10);--bg:#fdf8ef;--surface-0:#ffffff;--surface-1:#fffcf5;--surface-2:#faf5ea;--surface-3:#f3ecdb;--border:#f0e6d0;--border-hover:#e0d4b8;--text-primary:#2d2a24;--text-secondary:#6b6560;--text-muted:#a09888;--radius-sm:14px;--radius-md:20px;--radius-lg:28px;--radius-xl:36px;--shadow-soft:0 4px 24px rgba(200,180,130,.10);--shadow-card:0 8px 40px rgba(200,180,130,.12)}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
+        .bubble{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+        .bubble--1{width:280px;height:280px;background:radial-gradient(circle,rgba(245,183,49,.09),transparent 70%);top:-50px;right:-30px;animation:floatB 20s ease-in-out infinite alternate}
+        .bubble--2{width:200px;height:200px;background:radial-gradient(circle,rgba(232,163,23,.07),transparent 70%);bottom:10%;left:-40px;animation:floatB 17s ease-in-out infinite alternate-reverse}
+        @keyframes floatB{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.05)}100%{transform:translate(-10px,10px) scale(.97)}}
+        .page-wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:36px 20px 60px}
+
+        .navbar{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--radius-xl);margin-bottom:36px;box-shadow:var(--shadow-soft)}
+        .navbar__brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:var(--text-primary)}
+        .navbar__logo{width:36px;height:36px;background:linear-gradient(135deg,var(--yellow),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 12px rgba(245,183,49,.25)}
+        .navbar__nav{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+        .navbar__nav a{padding:7px 14px;border-radius:99px;color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:700;transition:all .25s;border:1.5px solid transparent}
+        .navbar__nav a:hover{color:var(--text-primary);background:var(--surface-2)}
+        .navbar__nav a.active{color:var(--yellow-dark);background:var(--yellow-light);border-color:rgba(245,183,49,.3)}
+
+        .hero{text-align:center;margin-bottom:32px}
+        .hero__badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:var(--yellow-light);border:1.5px solid rgba(245,183,49,.3);border-radius:99px;font-size:11px;font-weight:800;color:var(--yellow-dark);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+        .hero h1{font-size:clamp(26px,5vw,40px);font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
+        .hero h1 .gt{background:linear-gradient(135deg,var(--yellow),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{font-size:14px;color:var(--text-secondary);max-width:500px;margin:0 auto}
+
+        .kafka-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:700;margin-bottom:28px}
+        .kafka-badge .dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+        .kafka-badge--connected{background:var(--success-dim);color:var(--success);border:1.5px solid rgba(74,186,106,.25)}.kafka-badge--connected .dot{background:var(--success)}
+        .kafka-badge--fallback{background:var(--yellow-dim);color:var(--yellow-dark);border:1.5px solid rgba(245,183,49,.25)}.kafka-badge--fallback .dot{background:var(--yellow)}
+        .kafka-badge--disabled{background:var(--surface-2);color:var(--text-muted);border:1.5px solid var(--border)}.kafka-badge--disabled .dot{background:var(--text-muted)}
+
+        .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;width:100%;max-width:1100px;margin-bottom:28px}
+        .s-card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:22px;text-align:center;box-shadow:var(--shadow-soft);transition:all .2s}
+        .s-card:hover{transform:translateY(-2px);border-color:var(--border-hover)}
+        .s-card__val{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+        .s-card__lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-top:4px}
+
+        .event-list{width:100%;max-width:1100px;background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-card)}
+        .event-list__title{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+        .event-item{display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:10px;transition:all .25s}
+        .event-item:hover{border-color:var(--border-hover);transform:translateY(-1px)}
+        .event-item__icon{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+        .event-item--detection .event-item__icon{background:var(--yellow-dim);color:var(--yellow-dark)}
+        .event-item--feedback .event-item__icon{background:var(--info-dim);color:var(--info)}
+        .event-item__body{flex:1;min-width:0}
+        .event-item__title{font-size:14px;font-weight:700}
+        .event-item__meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+        .event-item__badge{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:800;flex-shrink:0}
+        .badge--real{background:var(--success-dim);color:var(--success)}
+        .badge--fake{background:var(--danger-dim);color:var(--danger)}
+        .badge--fb{background:var(--yellow-dim);color:var(--yellow-dark)}
+
+        .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+        .empty-state i{font-size:48px;margin-bottom:16px;display:block;opacity:.3}
+        .footer{margin-top:48px;text-align:center;color:var(--text-muted);font-size:12px}
+        .footer span{color:var(--yellow-dark)}
+        @media(max-width:768px){.stats-row{grid-template-columns:1fr 1fr}.navbar__nav a{padding:5px 9px;font-size:11px}}
+    </style>
+</head>
+<body>
+<div class="bubble bubble--1"></div><div class="bubble bubble--2"></div>
+<div class="page-wrapper">
+    <nav class="navbar">
+        <a href="/" class="navbar__brand"><div class="navbar__logo">🔍</div><span>TruthLens<span style="color:var(--yellow-dark)">AI</span></span></a>
+        <div class="navbar__nav">
+            <a href="/"><i class="fa-solid fa-shield-halved"></i> Detect</a>
+            <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+            <a href="/emotion"><i class="fa-solid fa-face-smile"></i> Emotion</a>
+            <a href="/age"><i class="fa-solid fa-user-clock"></i> Age</a>
+            <a href="/video-analysis"><i class="fa-solid fa-video"></i> Video</a>
+            <a href="/datasets"><i class="fa-solid fa-database"></i> Datasets</a>
+            <a href="/events" class="active"><i class="fa-solid fa-chart-line"></i> Events</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero__badge"><i class="fa-solid fa-bolt"></i> Real-Time Stream</div>
+        <h1><span class="gt">Kafka</span> Events</h1>
+        <p>Live event streaming dashboard. Every detection and feedback is captured and logged.</p>
+    </section>
+
+    <div class="kafka-badge kafka-badge--{{ kafka_status }}">
+        <span class="dot"></span>
+        {% if kafka_status == 'connected' %}Kafka Connected
+        {% elif kafka_status == 'fallback' %}JSON Fallback Mode
+        {% else %}Kafka Disabled{% endif %}
+    </div>
+
+    <div class="stats-row">
+        <div class="s-card"><div class="s-card__val" style="color:var(--yellow-dark)">{{ stats.total_scans }}</div><div class="s-card__lbl">Total Scans</div></div>
+        <div class="s-card"><div class="s-card__val" style="color:var(--success)">{{ stats.real_count }}</div><div class="s-card__lbl">Real</div></div>
+        <div class="s-card"><div class="s-card__val" style="color:var(--danger)">{{ stats.fake_count }}</div><div class="s-card__lbl">Deepfake</div></div>
+        <div class="s-card"><div class="s-card__val" style="color:var(--gold)">{{ stats.total_feedback }}</div><div class="s-card__lbl">Feedback</div></div>
+        <div class="s-card"><div class="s-card__val" style="color:var(--info)">{{ stats.avg_confidence }}%</div><div class="s-card__lbl">Avg Confidence</div></div>
+    </div>
+
+    <div class="event-list">
+        <div class="event-list__title"><i class="fa-solid fa-stream" style="color:var(--yellow-dark)"></i> Event Stream</div>
+        {% if events %}
+            {% for e in events %}
+            <div class="event-item event-item--{{ e.type }}">
+                <div class="event-item__icon">
+                    {% if e.type == 'detection' %}<i class="fa-solid fa-shield-halved"></i>
+                    {% else %}<i class="fa-solid fa-message"></i>{% endif %}
+                </div>
+                <div class="event-item__body">
+                    {% if e.type == 'detection' %}
+                    <div class="event-item__title">Image Scanned: {{ e.filename|default('—') }}</div>
+                    <div class="event-item__meta">Confidence: {{ (e.confidence * 100)|round(1) if e.confidence else '—' }}% &middot; {{ e.timestamp[:19] if e.timestamp else '' }}</div>
+                    {% else %}
+                    <div class="event-item__title">Feedback from {{ e.name|default('Anonymous') }}</div>
+                    <div class="event-item__meta">Rating: {{ e.rating|default('—') }}★ &middot; {{ e.timestamp[:19] if e.timestamp else '' }}</div>
+                    {% endif %}
+                </div>
+                {% if e.type == 'detection' %}
+                    {% if e.result == 'REAL IMAGE' %}<span class="event-item__badge badge--real">✔ Real</span>
+                    {% else %}<span class="event-item__badge badge--fake">⚠ Fake</span>{% endif %}
+                {% else %}
+                    <span class="event-item__badge badge--fb">{{ e.was_prediction_correct|default('—') }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <p>No events yet. Analyze an image to generate events.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">Built with <span>♥</span> by Kartik Singh &middot; Powered by Apache Kafka</div>
+</div>
+</body>
+</html>

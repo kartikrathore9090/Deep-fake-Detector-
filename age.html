@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Estimation | TruthLens AI</title>
+    <meta name="description" content="Deep computer vision age estimation from facial inputs.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{--font:'Nunito',sans-serif;--yellow:#f5b731;--yellow-light:#fff3cd;--yellow-dim:rgba(245,183,49,.12);--yellow-dark:#d4960a;--gold:#e8a317;--success:#4aba6a;--success-dim:rgba(74,186,106,.10);--danger:#e05555;--danger-dim:rgba(224,85,85,.10);--bg:#fdf8ef;--surface-0:#ffffff;--surface-1:#fffcf5;--surface-2:#faf5ea;--surface-3:#f3ecdb;--border:#f0e6d0;--border-hover:#e0d4b8;--text-primary:#2d2a24;--text-secondary:#6b6560;--text-muted:#a09888;--radius-sm:14px;--radius-md:20px;--radius-lg:28px;--radius-xl:36px;--shadow-soft:0 4px 24px rgba(200,180,130,.10);--shadow-card:0 8px 40px rgba(200,180,130,.12)}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
+        .bubble{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+        .bubble--1{width:280px;height:280px;background:radial-gradient(circle,rgba(245,183,49,.09),transparent 70%);top:-50px;right:-30px;animation:floatB 19s ease-in-out infinite alternate}
+        .bubble--2{width:200px;height:200px;background:radial-gradient(circle,rgba(232,163,23,.07),transparent 70%);bottom:10%;left:-50px;animation:floatB 23s ease-in-out infinite alternate-reverse}
+        @keyframes floatB{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.05)}100%{transform:translate(-10px,10px) scale(.97)}}
+        .page-wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:36px 20px 60px}
+        .navbar{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--radius-xl);margin-bottom:36px;box-shadow:var(--shadow-soft)}
+        .navbar__brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:var(--text-primary)}
+        .navbar__logo{width:36px;height:36px;background:linear-gradient(135deg,var(--yellow),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 12px rgba(245,183,49,.25)}
+        .navbar__nav{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+        .navbar__nav a{padding:7px 14px;border-radius:99px;color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:700;transition:all .25s;border:1.5px solid transparent}
+        .navbar__nav a:hover{color:var(--text-primary);background:var(--surface-2)}
+        .navbar__nav a.active{color:var(--yellow-dark);background:var(--yellow-light);border-color:rgba(245,183,49,.3)}
+        .hero{text-align:center;margin-bottom:32px}
+        .hero__badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:var(--yellow-light);border:1.5px solid rgba(245,183,49,.3);border-radius:99px;font-size:11px;font-weight:800;color:var(--yellow-dark);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+        .hero h1{font-size:clamp(24px,4.5vw,36px);font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
+        .hero p{font-size:14px;color:var(--text-secondary);max-width:480px;margin:0 auto}
+        .content{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:860px}
+        .card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-card)}
+        .upload-zone{border:2px dashed var(--border-hover);border-radius:var(--radius-md);padding:34px 20px;cursor:pointer;transition:all .3s;background:var(--surface-1);text-align:center;margin-bottom:18px;position:relative}
+        .upload-zone:hover{border-color:var(--yellow);background:var(--yellow-dim)}
+        .upload-zone__icon{width:50px;height:50px;margin:0 auto 12px;background:var(--yellow-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--yellow-dark)}
+        .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+        .preview-box{border-radius:var(--radius-md);overflow:hidden;border:1.5px solid var(--border);margin-bottom:18px;display:none}
+        .preview-box.visible{display:block}
+        .preview-box img{width:100%;display:block}
+        .btn-analyze{width:100%;padding:12px;font-family:var(--font);font-size:14px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--yellow),var(--gold));border:none;border-radius:var(--radius-md);cursor:pointer;transition:all .25s;text-transform:uppercase;box-shadow:0 4px 16px rgba(245,183,49,.3)}
+        .btn-analyze:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,183,49,.35)}
+        .age-display{text-align:center;margin-bottom:24px}
+        .age-display__number{font-size:72px;font-weight:900;line-height:1}
+        .age-display__label{font-size:13px;color:var(--text-secondary);margin-top:6px;font-weight:700}
+        .age-display__years{font-size:13px;color:var(--text-muted)}
+        .age-group{display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:18px}
+        .age-group__icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px}
+        .age-group__label{font-size:15px;font-weight:800;text-transform:capitalize}
+        .age-group__range{font-size:12px;color:var(--text-secondary)}
+        .minor-alert{padding:14px;border-radius:var(--radius-md);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+        .minor-alert--yes{background:var(--danger-dim);border:1.5px solid rgba(224,85,85,.2);color:var(--danger)}
+        .minor-alert--no{background:var(--success-dim);border:1.5px solid rgba(74,186,106,.2);color:var(--success)}
+        .minor-alert i{font-size:16px}
+        .minor-alert span{font-size:12px;font-weight:700}
+        .conf-gauge{margin-top:18px}
+        .conf-gauge__header{display:flex;justify-content:space-between;margin-bottom:6px}
+        .conf-gauge__label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
+        .conf-gauge__val{font-size:13px;font-weight:900}
+        .conf-track{height:8px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+        .conf-bar{height:100%;border-radius:99px;transition:width 1.2s ease}
+        .result-placeholder{text-align:center;padding:70px 20px;color:var(--text-muted)}
+        .result-placeholder i{font-size:40px;display:block;margin-bottom:14px;opacity:.3}
+        .footer{margin-top:48px;text-align:center;color:var(--text-muted);font-size:12px;width:100%}
+        .footer span{color:var(--yellow-dark)}
+        @media(max-width:768px){.content{grid-template-columns:1fr}.navbar__nav a{padding:5px 9px;font-size:11px}}
+    </style>
+</head>
+<body>
+<div class="bubble bubble--1"></div><div class="bubble bubble--2"></div>
+<div class="page-wrapper">
+    <nav class="navbar">
+        <a href="/" class="navbar__brand"><div class="navbar__logo">🔍</div><span>TruthLens<span style="color:var(--yellow-dark)">AI</span></span></a>
+        <div class="navbar__nav">
+            <a href="/"><i class="fa-solid fa-shield-halved"></i> Detect</a>
+            <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+            <a href="/emotion"><i class="fa-solid fa-face-smile"></i> Emotion</a>
+            <a href="/age" class="active"><i class="fa-solid fa-user-clock"></i> Age</a>
+            <a href="/video-analysis"><i class="fa-solid fa-video"></i> Video</a>
+            <a href="/datasets"><i class="fa-solid fa-database"></i> Datasets</a>
+            <a href="/events"><i class="fa-solid fa-chart-line"></i> Events</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="hero__badge"><i class="fa-solid fa-user-clock"></i> Computer Vision</div>
+        <h1>Age Estimation</h1>
+        <p>Estimate age from facial inputs with deep learning. Enables age-gating and compliance enforcement.</p>
+    </section>
+    <div class="content">
+        <div class="card">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-zone__icon"><i class="fa-solid fa-user-clock"></i></div>
+                    <div style="font-size:14px;font-weight:700">Drop a face image</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Best with clear, front-facing photos</div>
+                    <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
+                </div>
+                <div class="preview-box" id="previewBox"><img id="preview" src="" alt="Preview"></div>
+                <button type="submit" class="btn-analyze"><i class="fa-solid fa-user-clock"></i> Estimate Age</button>
+            </form>
+        </div>
+        <div class="card">
+            {% if result %}
+            <div class="age-display">
+                <div class="age-display__number" style="color:{{ result.group_color }}">{{ result.estimated_age }}</div>
+                <div class="age-display__label">Estimated Age</div>
+                <div class="age-display__years">years old</div>
+            </div>
+            <div class="age-group">
+                <div class="age-group__icon" style="background:{{ result.group_color }}22;color:{{ result.group_color }}"><i class="fa-solid {{ result.group_icon }}"></i></div>
+                <div><div class="age-group__label" style="color:{{ result.group_color }}">{{ result.age_group|replace('_', ' ') }}</div><div class="age-group__range">Age range: {{ result.age_range }}</div></div>
+            </div>
+            <div class="minor-alert minor-alert--{% if result.is_minor %}yes{% else %}no{% endif %}">
+                <i class="fa-solid {% if result.is_minor %}fa-triangle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+                <span>{% if result.is_minor %}Minor Detected — Age under 18{% else %}Adult — Age 18 or above{% endif %}</span>
+            </div>
+            <div class="conf-gauge">
+                <div class="conf-gauge__header"><span class="conf-gauge__label">Confidence</span><span class="conf-gauge__val" style="color:{{ result.group_color }}">{{ result.confidence }}%</span></div>
+                <div class="conf-track"><div class="conf-bar" id="confBar" style="width:{{ result.confidence }}%;background:{{ result.group_color }}"></div></div>
+            </div>
+            {% else %}
+            <div class="result-placeholder"><i class="fa-solid fa-user-clock"></i><p>Upload a face image to estimate age.</p></div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="footer">Built with <span>♥</span> by Kartik Singh &middot; Powered by ViT Age Classifier</div>
+</div>
+<script>
+function previewImage(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{document.getElementById('preview').src=ev.target.result;document.getElementById('previewBox').classList.add('visible');document.getElementById('uploadZone').style.display='none'};r.readAsDataURL(f)}
+window.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('confBar');if(b){const w=b.style.width;b.style.width='0%';setTimeout(()=>{b.style.width=w},300)}});
+</script>
+</body>
+</html>

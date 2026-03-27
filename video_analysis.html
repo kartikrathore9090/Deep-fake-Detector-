@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call Analysis | TruthLens AI</title>
+    <meta name="description" content="Real-time video analysis with emotion detection, age estimation, and credibility signals.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{--font:'Nunito',sans-serif;--yellow:#f5b731;--yellow-light:#fff3cd;--yellow-dim:rgba(245,183,49,.12);--yellow-dark:#d4960a;--gold:#e8a317;--success:#4aba6a;--success-dim:rgba(74,186,106,.10);--danger:#e05555;--danger-dim:rgba(224,85,85,.10);--bg:#fdf8ef;--surface-0:#ffffff;--surface-1:#fffcf5;--surface-2:#faf5ea;--surface-3:#f3ecdb;--border:#f0e6d0;--border-hover:#e0d4b8;--text-primary:#2d2a24;--text-secondary:#6b6560;--text-muted:#a09888;--radius-sm:14px;--radius-md:20px;--radius-lg:28px;--radius-xl:36px;--shadow-soft:0 4px 24px rgba(200,180,130,.10);--shadow-card:0 8px 40px rgba(200,180,130,.12)}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
+        .bubble{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+        .bubble--1{width:300px;height:300px;background:radial-gradient(circle,rgba(245,183,49,.09),transparent 70%);top:-60px;right:-40px;animation:floatB 20s ease-in-out infinite alternate}
+        .bubble--2{width:220px;height:220px;background:radial-gradient(circle,rgba(232,163,23,.07),transparent 70%);bottom:8%;left:-50px;animation:floatB 17s ease-in-out infinite alternate-reverse}
+        @keyframes floatB{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.05)}100%{transform:translate(-10px,10px) scale(.97)}}
+        .page-wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:36px 20px 60px}
+        .navbar{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--radius-xl);margin-bottom:36px;box-shadow:var(--shadow-soft)}
+        .navbar__brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:var(--text-primary)}
+        .navbar__logo{width:36px;height:36px;background:linear-gradient(135deg,var(--yellow),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 12px rgba(245,183,49,.25)}
+        .navbar__nav{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+        .navbar__nav a{padding:7px 14px;border-radius:99px;color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:700;transition:all .25s;border:1.5px solid transparent}
+        .navbar__nav a:hover{color:var(--text-primary);background:var(--surface-2)}
+        .navbar__nav a.active{color:var(--yellow-dark);background:var(--yellow-light);border-color:rgba(245,183,49,.3)}
+        .hero{text-align:center;margin-bottom:32px}
+        .hero__badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:var(--yellow-light);border:1.5px solid rgba(245,183,49,.3);border-radius:99px;font-size:11px;font-weight:800;color:var(--yellow-dark);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+        .hero h1{font-size:clamp(24px,4.5vw,36px);font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
+        .hero p{font-size:14px;color:var(--text-secondary);max-width:520px;margin:0 auto}
+        .main-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;width:100%;max-width:1100px}
+        .card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-card)}
+        .video-container{position:relative;border-radius:var(--radius-md);overflow:hidden;border:1.5px solid var(--border);background:var(--surface-3);aspect-ratio:4/3;margin-bottom:18px}
+        .video-container video{width:100%;height:100%;object-fit:cover;display:block}
+        .video-container canvas{display:none}
+        .live-badge{position:absolute;top:14px;left:14px;display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-radius:99px;font-size:10px;font-weight:800;z-index:5;color:var(--danger)}
+        .live-badge .dot{width:6px;height:6px;background:var(--danger);border-radius:50%;animation:pulse 1.5s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+        .controls{display:flex;gap:8px;justify-content:center}
+        .ctrl-btn{font-family:var(--font);padding:10px 20px;font-size:13px;font-weight:800;border-radius:99px;border:none;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:6px}
+        .ctrl-btn--start{background:linear-gradient(135deg,var(--yellow),var(--gold));color:#fff;box-shadow:0 3px 12px rgba(245,183,49,.25)}
+        .ctrl-btn--start:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,183,49,.3)}
+        .ctrl-btn--stop{background:var(--danger);color:white}
+        .ctrl-btn--stop:hover{transform:translateY(-2px)}
+        .ctrl-btn--voice{background:var(--surface-2);color:var(--text-primary);border:1.5px solid var(--border)}
+        .ctrl-btn--voice:hover{border-color:var(--yellow);background:var(--yellow-dim)}
+        .ctrl-btn:disabled{opacity:.4;cursor:not-allowed;transform:none !important}
+        .panel-section{margin-bottom:18px}
+        .panel-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+        .cred-ring{text-align:center;margin-bottom:20px}
+        .cred-ring svg{width:110px;height:110px}
+        .metric{display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;transition:all .2s}
+        .metric__left{display:flex;align-items:center;gap:8px}
+        .metric__icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;background:var(--yellow-dim);color:var(--yellow-dark)}
+        .metric__name{font-size:12px;font-weight:700}
+        .metric__value{font-size:13px;font-weight:800}
+        .voice-panel{background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-top:14px}
+        .voice-panel__status{font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+        .voice-panel__transcript{margin-top:8px;font-size:12px;color:var(--text-primary);background:var(--surface-0);padding:8px;border-radius:var(--radius-sm);min-height:36px;display:none}
+        .voice-panel__response{margin-top:6px;font-size:12px;color:var(--success);display:none}
+        .footer{margin-top:48px;text-align:center;color:var(--text-muted);font-size:12px;width:100%}
+        .footer span{color:var(--yellow-dark)}
+        @media(max-width:900px){.main-grid{grid-template-columns:1fr}.navbar__nav a{padding:5px 9px;font-size:11px}}
+    </style>
+</head>
+<body>
+<div class="bubble bubble--1"></div><div class="bubble bubble--2"></div>
+<div class="page-wrapper">
+    <nav class="navbar">
+        <a href="/" class="navbar__brand"><div class="navbar__logo">🔍</div><span>TruthLens<span style="color:var(--yellow-dark)">AI</span></span></a>
+        <div class="navbar__nav">
+            <a href="/"><i class="fa-solid fa-shield-halved"></i> Detect</a>
+            <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+            <a href="/emotion"><i class="fa-solid fa-face-smile"></i> Emotion</a>
+            <a href="/age"><i class="fa-solid fa-user-clock"></i> Age</a>
+            <a href="/video-analysis" class="active"><i class="fa-solid fa-video"></i> Video</a>
+            <a href="/datasets"><i class="fa-solid fa-database"></i> Datasets</a>
+            <a href="/events"><i class="fa-solid fa-chart-line"></i> Events</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="hero__badge"><i class="fa-solid fa-video"></i> Live Analysis</div>
+        <h1>Video Call Analysis</h1>
+        <p>Real-time emotion detection, age estimation, and credibility signals via your webcam. Includes voice assistant.</p>
+    </section>
+    <div class="main-grid">
+        <div class="card">
+            <div class="video-container" id="videoContainer">
+                <span class="live-badge" id="liveBadge" style="display:none"><span class="dot"></span> LIVE</span>
+                <video id="webcamVideo" autoplay playsinline></video>
+                <canvas id="captureCanvas"></canvas>
+            </div>
+            <div class="controls">
+                <button class="ctrl-btn ctrl-btn--start" id="btnStart" onclick="startAnalysis()"><i class="fa-solid fa-play"></i> Start</button>
+                <button class="ctrl-btn ctrl-btn--stop" id="btnStop" onclick="stopAnalysis()" disabled><i class="fa-solid fa-stop"></i> Stop</button>
+                <button class="ctrl-btn ctrl-btn--voice" id="btnVoice" onclick="toggleVoice()"><i class="fa-solid fa-microphone"></i></button>
+            </div>
+            <div class="voice-panel">
+                <div class="voice-panel__status" id="voiceStatus"><i class="fa-solid fa-microphone-slash"></i> Voice assistant ready</div>
+                <div class="voice-panel__transcript" id="voiceTranscript"></div>
+                <div class="voice-panel__response" id="voiceResponse"></div>
+            </div>
+        </div>
+        <div class="card">
+            <div id="resultsPanel">
+                <div class="cred-ring">
+                    <svg viewBox="0 0 120 120" id="credRingSvg">
+                        <circle cx="60" cy="60" r="52" fill="none" stroke="var(--surface-3)" stroke-width="8"/>
+                        <circle cx="60" cy="60" r="52" fill="none" stroke="var(--yellow)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" id="credArc"/>
+                        <text x="60" y="56" text-anchor="middle" fill="var(--text-primary)" font-size="24" font-weight="900" font-family="Nunito" id="credText">—</text>
+                        <text x="60" y="74" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="Nunito">CREDIBILITY</text>
+                    </svg>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title"><i class="fa-solid fa-shield-halved"></i> Deepfake Analysis</div>
+                    <div class="metric"><div class="metric__left"><div class="metric__icon"><i class="fa-solid fa-shield-halved"></i></div><span class="metric__name">Authenticity</span></div><span class="metric__value" id="valDeepfake" style="color:var(--text-muted)">—</span></div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title"><i class="fa-solid fa-face-smile"></i> Emotion</div>
+                    <div class="metric"><div class="metric__left"><div class="metric__icon"><i class="fa-solid fa-brain"></i></div><span class="metric__name" id="emotionName">Emotion</span></div><span class="metric__value" id="valEmotion" style="color:var(--text-muted)">—</span></div>
+                    <div class="metric"><div class="metric__left"><div class="metric__icon"><i class="fa-solid fa-eye"></i></div><span class="metric__name">Deception Cue</span></div><span class="metric__value" id="valDeception" style="color:var(--text-muted)">—</span></div>
+                </div>
+                <div class="panel-section">
+                    <div class="panel-title"><i class="fa-solid fa-user-clock"></i> Age</div>
+                    <div class="metric"><div class="metric__left"><div class="metric__icon"><i class="fa-solid fa-user"></i></div><span class="metric__name" id="ageName">Estimated Age</span></div><span class="metric__value" id="valAge" style="color:var(--text-muted)">—</span></div>
+                    <div class="metric"><div class="metric__left"><div class="metric__icon"><i class="fa-solid fa-child"></i></div><span class="metric__name">Minor Status</span></div><span class="metric__value" id="valMinor" style="color:var(--text-muted)">—</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">Built with <span>♥</span> by Kartik Singh &middot; TruthLens AI — Real-Time Video Analysis</div>
+</div>
+<script>
+let webcamStream=null,analysisInterval=null,isAnalyzing=false,speechRecognition=null,isListening=false;
+async function startAnalysis(){try{webcamStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480}});document.getElementById('webcamVideo').srcObject=webcamStream;document.getElementById('liveBadge').style.display='flex';document.getElementById('btnStart').disabled=true;document.getElementById('btnStop').disabled=false;isAnalyzing=true;analysisInterval=setInterval(captureAndAnalyze,3000);setTimeout(captureAndAnalyze,1000)}catch(e){alert('Camera access denied: '+e.message)}}
+function stopAnalysis(){isAnalyzing=false;if(webcamStream){webcamStream.getTracks().forEach(t=>t.stop());webcamStream=null}if(analysisInterval){clearInterval(analysisInterval);analysisInterval=null}document.getElementById('liveBadge').style.display='none';document.getElementById('btnStart').disabled=false;document.getElementById('btnStop').disabled=true}
+async function captureAndAnalyze(){if(!isAnalyzing)return;const v=document.getElementById('webcamVideo'),c=document.getElementById('captureCanvas');c.width=v.videoWidth||640;c.height=v.videoHeight||480;c.getContext('2d').drawImage(v,0,0);const d=c.toDataURL('image/jpeg',0.8);try{const r=await fetch('/api/analyze-frame',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image_data:d})});const data=await r.json();updatePanel(data)}catch(e){console.error('Analysis error:',e)}}
+function updatePanel(data){const cs=data.credibility_score||0,ca=document.getElementById('credArc'),ct=document.getElementById('credText'),circ=326.73,off=circ-(cs/100*circ);ca.style.transition='stroke-dashoffset 1s ease';ca.setAttribute('stroke-dashoffset',off);ca.setAttribute('stroke',cs>=70?'var(--success)':cs>=40?'var(--yellow)':'var(--danger)');ct.textContent=Math.round(cs);if(data.deepfake){const df=data.deepfake,v=document.getElementById('valDeepfake');v.textContent=df.result==='REAL IMAGE'?'✔ Real':'⚠ Fake';v.style.color=df.result==='REAL IMAGE'?'var(--success)':'var(--danger)'}if(data.emotion){const em=data.emotion;document.getElementById('emotionName').textContent=em.primary_emoji+' '+(em.primary_emotion||'').charAt(0).toUpperCase()+(em.primary_emotion||'').slice(1);const ve=document.getElementById('valEmotion');ve.textContent=em.confidence+'%';ve.style.color='var(--text-primary)';const vd=document.getElementById('valDeception');vd.textContent=em.deception_score+'%';vd.style.color=em.deception_score>30?'var(--danger)':'var(--success)'}if(data.age){const a=data.age,va=document.getElementById('valAge');va.textContent='~'+a.estimated_age+' yrs';va.style.color='var(--text-primary)';document.getElementById('ageName').textContent=(a.age_group||'').replace('_',' ');const vm=document.getElementById('valMinor');vm.textContent=a.is_minor?'⚠ Minor':'✔ Adult';vm.style.color=a.is_minor?'var(--danger)':'var(--success)'}}
+function toggleVoice(){if(isListening){stopVoice();return}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Speech Recognition not supported.');return}speechRecognition=new SR();speechRecognition.continuous=false;speechRecognition.interimResults=false;speechRecognition.lang='en-US';const st=document.getElementById('voiceStatus'),tr=document.getElementById('voiceTranscript'),re=document.getElementById('voiceResponse'),bt=document.getElementById('btnVoice');speechRecognition.onstart=()=>{isListening=true;st.innerHTML='<i class="fa-solid fa-microphone" style="color:var(--danger)"></i> Listening...';bt.style.background='var(--danger)';bt.style.color='white'};speechRecognition.onresult=(e)=>{const t=e.results[0][0].transcript;tr.style.display='block';tr.textContent='🗣️ "'+t+'"';const a=processVoiceCommand(t);re.style.display='block';re.textContent='🤖 '+a;const u=new SpeechSynthesisUtterance(a);window.speechSynthesis.speak(u)};speechRecognition.onend=()=>{isListening=false;st.innerHTML='<i class="fa-solid fa-microphone-slash"></i> Voice assistant ready';bt.style.background='var(--surface-2)';bt.style.color='var(--text-primary)'};speechRecognition.onerror=(e)=>{isListening=false;st.innerHTML='<i class="fa-solid fa-microphone-slash"></i> Error: '+e.error};speechRecognition.start()}
+function stopVoice(){if(speechRecognition)speechRecognition.stop();isListening=false}
+function processVoiceCommand(text){const l=text.toLowerCase(),cr=document.getElementById('credText').textContent,df=document.getElementById('valDeepfake').textContent,en=document.getElementById('emotionName').textContent,ev=document.getElementById('valEmotion').textContent,av=document.getElementById('valAge').textContent,dv=document.getElementById('valDeception').textContent;if(l.includes('credibility')||l.includes('trust'))return'The current credibility score is '+cr+' percent.';if(l.includes('real')||l.includes('fake')||l.includes('deepfake'))return'The deepfake analysis shows: '+df+'.';if(l.includes('emotion')||l.includes('feeling'))return'The detected emotion is '+en+' with '+ev+' confidence.';if(l.includes('age')||l.includes('old'))return'The estimated age is '+av+'.';if(l.includes('deception')||l.includes('lying'))return'The deception cue score is '+dv+'.';if(l.includes('all')||l.includes('summary'))return'Summary: Credibility '+cr+'%. Deepfake '+df+'. Emotion '+en+' at '+ev+'. Age '+av+'. Deception cue '+dv+'.';if(l.includes('stop')){stopAnalysis();return'Analysis stopped.'}if(l.includes('start')){startAnalysis();return'Starting video analysis.'}return'I heard: "'+text+'". Try asking about credibility, emotion, age, deepfake status, or deception cues.'}
+</script>
+</body>
+</html>

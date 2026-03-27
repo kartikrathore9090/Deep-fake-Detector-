@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthLens AI | Deepfake Detection</title>
+    <meta name="description" content="AI-powered deepfake detection using Vision Transformers. Upload an image to instantly verify its authenticity.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --font: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            --yellow: #f5b731;
+            --yellow-light: #fff3cd;
+            --yellow-dim: rgba(245,183,49,0.12);
+            --yellow-dark: #d4960a;
+            --gold: #e8a317;
+            --success: #4aba6a;
+            --success-dim: rgba(74,186,106,0.10);
+            --danger: #e05555;
+            --danger-dim: rgba(224,85,85,0.10);
+            --bg: #fdf8ef;
+            --surface-0: #ffffff;
+            --surface-1: #fffcf5;
+            --surface-2: #faf5ea;
+            --surface-3: #f3ecdb;
+            --border: #f0e6d0;
+            --border-hover: #e0d4b8;
+            --text-primary: #2d2a24;
+            --text-secondary: #6b6560;
+            --text-muted: #a09888;
+            --radius-sm: 14px;
+            --radius-md: 20px;
+            --radius-lg: 28px;
+            --radius-xl: 36px;
+            --shadow-soft: 0 4px 24px rgba(200,180,130,0.10);
+            --shadow-card: 0 8px 40px rgba(200,180,130,0.12);
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Decorative bubbles */
+        .bubble {
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+        }
+        .bubble--1 { width:340px;height:340px;background:radial-gradient(circle,rgba(245,183,49,0.10),transparent 70%);top:-80px;right:-60px;animation:floatB 20s ease-in-out infinite alternate }
+        .bubble--2 { width:260px;height:260px;background:radial-gradient(circle,rgba(245,183,49,0.08),transparent 70%);bottom:10%;left:-80px;animation:floatB 16s ease-in-out infinite alternate-reverse }
+        .bubble--3 { width:180px;height:180px;background:radial-gradient(circle,rgba(232,163,23,0.07),transparent 70%);top:50%;right:15%;animation:floatB 24s ease-in-out infinite alternate }
+        @keyframes floatB { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-15px) scale(1.05)} 100%{transform:translate(-10px,10px) scale(0.97)} }
+
+        .page-wrapper { position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:36px 20px 60px }
+
+        /* NAVBAR */
+        .navbar { width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--radius-xl);margin-bottom:44px;box-shadow:var(--shadow-soft);animation:fadeDown .6s ease-out }
+        .navbar__brand { display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:var(--text-primary) }
+        .navbar__logo { width:36px;height:36px;background:linear-gradient(135deg,var(--yellow),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 12px rgba(245,183,49,0.25) }
+        .navbar__nav { display:flex;align-items:center;gap:3px;flex-wrap:wrap }
+        .navbar__nav a { padding:7px 14px;border-radius:99px;color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:700;transition:all .25s;border:1.5px solid transparent;white-space:nowrap }
+        .navbar__nav a:hover { color:var(--text-primary);background:var(--surface-2);border-color:var(--border) }
+        .navbar__nav a.active { color:var(--yellow-dark);background:var(--yellow-light);border-color:rgba(245,183,49,0.3) }
+        .navbar__nav .nav-social { width:33px;height:33px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--surface-2);border:1.5px solid var(--border);margin-left:3px }
+        .navbar__nav .nav-social:hover { border-color:var(--yellow);background:var(--yellow-dim);transform:translateY(-2px) }
+
+        /* HERO */
+        .hero { text-align:center;margin-bottom:44px;animation:fadeUp .7s ease-out }
+        .hero__badge { display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:var(--yellow-light);border:1.5px solid rgba(245,183,49,0.3);border-radius:99px;font-size:11px;font-weight:800;color:var(--yellow-dark);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px }
+        .hero__badge .pulse-dot { width:7px;height:7px;background:var(--yellow);border-radius:50%;animation:pulse 2s ease-in-out infinite }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+        .hero h1 { font-size:clamp(32px,5.5vw,50px);font-weight:900;line-height:1.15;letter-spacing:-1px;margin-bottom:14px;color:var(--text-primary) }
+        .hero h1 .gradient-text { background:linear-gradient(135deg,var(--yellow),var(--gold),var(--yellow-dark));background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease-in-out infinite }
+        @keyframes shimmer { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+        .hero p { font-size:15px;color:var(--text-secondary);max-width:470px;margin:0 auto;line-height:1.7 }
+
+        /* MAIN CARD */
+        .main-card { width:100%;max-width:560px;background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-xl);padding:36px;box-shadow:var(--shadow-card);animation:fadeUp .8s ease-out;position:relative;overflow:hidden }
+        .main-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--yellow),var(--gold),transparent);opacity:.6 }
+
+        /* UPLOAD ZONE */
+        .upload-zone { position:relative;border:2px dashed var(--border-hover);border-radius:var(--radius-lg);padding:40px 24px;cursor:pointer;transition:all .3s;background:var(--surface-1);text-align:center;margin-bottom:22px }
+        .upload-zone:hover,.upload-zone.drag-over { border-color:var(--yellow);background:var(--yellow-dim);transform:translateY(-2px) }
+        .upload-zone__icon { width:60px;height:60px;margin:0 auto 14px;background:var(--yellow-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--yellow-dark);border:1.5px solid rgba(245,183,49,0.25);transition:transform .3s }
+        .upload-zone:hover .upload-zone__icon { transform:scale(1.1) rotate(-5deg) }
+        .upload-zone__title { font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:4px }
+        .upload-zone__subtitle { font-size:12px;color:var(--text-muted) }
+        .upload-zone input[type="file"] { position:absolute;inset:0;opacity:0;cursor:pointer }
+
+        .preview-wrapper { position:relative;margin-bottom:22px;border-radius:var(--radius-md);overflow:hidden;border:1.5px solid var(--border);display:none }
+        .preview-wrapper.visible { display:block;animation:fadeIn .4s ease }
+        .preview-wrapper img { display:block;width:100%;height:auto }
+        .scan-beam { position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--yellow),transparent);box-shadow:0 0 16px var(--yellow);z-index:5;display:none }
+        .scanning .scan-beam { display:block;animation:scanMove 2.5s ease-in-out infinite }
+        @keyframes scanMove { 0%{top:0%;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:100%;opacity:0} }
+
+        .btn-analyze { width:100%;padding:15px 24px;font-family:var(--font);font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--yellow),var(--gold));border:none;border-radius:var(--radius-md);cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:.5px;box-shadow:0 4px 16px rgba(245,183,49,0.3) }
+        .btn-analyze:hover { transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,183,49,0.35) }
+        .btn-analyze:active { transform:translateY(0) }
+        .btn-analyze i { margin-right:8px }
+
+        /* RESULTS */
+        .results { margin-top:32px;animation:fadeUp .5s ease-out }
+        .results__divider { height:1.5px;background:linear-gradient(90deg,transparent,var(--border-hover),transparent);margin-bottom:28px }
+        .verdict { display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 26px;border-radius:var(--radius-md);font-size:17px;font-weight:800;margin-bottom:24px;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275) }
+        .verdict--real { color:var(--success);background:var(--success-dim);border:1.5px solid rgba(74,186,106,0.25) }
+        .verdict--fake { color:var(--danger);background:var(--danger-dim);border:1.5px solid rgba(224,85,85,0.25) }
+        .verdict__icon { width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px }
+        .verdict--real .verdict__icon { background:rgba(74,186,106,0.15) }
+        .verdict--fake .verdict__icon { background:rgba(224,85,85,0.15) }
+        @keyframes popIn { 0%{transform:scale(.8);opacity:0} 100%{transform:scale(1);opacity:1} }
+
+        .confidence-card { background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:22px;margin-bottom:22px }
+        .confidence-card__label { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px }
+        .confidence-card__title { font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px }
+        .confidence-card__value { font-size:22px;font-weight:900;font-variant-numeric:tabular-nums }
+        .confidence-card__value--real { color:var(--success) }
+        .confidence-card__value--fake { color:var(--danger) }
+        .progress-track { width:100%;height:10px;background:var(--surface-3);border-radius:99px;overflow:hidden }
+        .progress-bar { height:100%;width:0%;border-radius:99px;transition:width 1.6s cubic-bezier(.15,.85,.35,1) }
+        .progress-bar--real { background:linear-gradient(90deg,var(--success),#6dd58f) }
+        .progress-bar--fake { background:linear-gradient(90deg,var(--danger),#f08080) }
+
+        .analysis-section { margin-top:24px }
+        .analysis-section__title { font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:7px }
+        .analysis-section__title i { color:var(--yellow-dark) }
+        .analysis-img { width:100%;border-radius:var(--radius-md);border:1.5px solid var(--border) }
+
+        /* FEEDBACK */
+        .feedback-section { margin-top:32px;animation:fadeUp .6s ease-out .1s both }
+        .feedback-section__title { font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:9px }
+        .feedback-section__title i { color:var(--yellow) }
+        .yn-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px }
+        .yn-btn { font-family:var(--font);padding:13px;background:var(--surface-2);border:1.5px solid var(--border);color:var(--text-secondary);border-radius:var(--radius-md);cursor:pointer;transition:all .25s;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px }
+        .yn-btn:hover { border-color:var(--border-hover);background:var(--surface-3);color:var(--text-primary) }
+        .yn-btn.selected-yes { background:var(--success-dim);border-color:var(--success);color:var(--success) }
+        .yn-btn.selected-no { background:var(--danger-dim);border-color:var(--danger);color:var(--danger) }
+        .form-input { width:100%;font-family:var(--font);font-size:14px;background:var(--surface-1);border:1.5px solid var(--border);padding:13px 16px;border-radius:var(--radius-md);color:var(--text-primary);margin-bottom:12px;outline:none;transition:border-color .25s,box-shadow .25s }
+        .form-input::placeholder { color:var(--text-muted) }
+        .form-input:focus { border-color:var(--yellow);box-shadow:0 0 0 3px var(--yellow-dim) }
+        textarea.form-input { resize:vertical;min-height:76px }
+        .star-rating-container { display:flex;align-items:center;gap:12px;margin-bottom:16px }
+        .star-rating-label { font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap }
+        .stars { display:flex;flex-direction:row-reverse;gap:3px }
+        .stars input { display:none }
+        .stars label { font-size:24px;color:var(--surface-3);cursor:pointer;transition:all .15s }
+        .stars label:hover,.stars label:hover ~ label,.stars input:checked ~ label { color:var(--yellow);text-shadow:0 0 10px rgba(245,183,49,0.3);transform:scale(1.15) }
+        .btn-submit { width:100%;padding:13px 24px;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text-primary);background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:.5px }
+        .btn-submit:hover { background:var(--yellow-dim);border-color:var(--yellow);color:var(--yellow-dark);transform:translateY(-1px) }
+
+        .footer { margin-top:48px;text-align:center;color:var(--text-muted);font-size:12px }
+        .footer span { color:var(--yellow-dark) }
+
+        @keyframes fadeDown { 0%{opacity:0;transform:translateY(-16px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp { 0%{opacity:0;transform:translateY(18px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes fadeIn { 0%{opacity:0} 100%{opacity:1} }
+        @media(max-width:640px){ .main-card{padding:26px 18px} .navbar{padding:10px 16px;margin-bottom:28px} .hero h1{font-size:28px} }
+    </style>
+</head>
+<body>
+
+<div class="bubble bubble--1"></div>
+<div class="bubble bubble--2"></div>
+<div class="bubble bubble--3"></div>
+
+<div class="page-wrapper">
+    <nav class="navbar" id="navbar">
+        <a href="/" class="navbar__brand">
+            <div class="navbar__logo">🔍</div>
+            <span>TruthLens<span style="color:var(--yellow-dark)">AI</span></span>
+        </a>
+        <div class="navbar__nav">
+            <a href="/" class="active" id="nav-detect"><i class="fa-solid fa-shield-halved"></i> Detect</a>
+            <a href="/history" id="nav-history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+            <a href="/emotion" id="nav-emotion"><i class="fa-solid fa-face-smile"></i> Emotion</a>
+            <a href="/age" id="nav-age"><i class="fa-solid fa-user-clock"></i> Age</a>
+            <a href="/video-analysis" id="nav-video"><i class="fa-solid fa-video"></i> Video</a>
+            <a href="/datasets" id="nav-datasets"><i class="fa-solid fa-database"></i> Datasets</a>
+            <a href="/events" id="nav-events"><i class="fa-solid fa-chart-line"></i> Events</a>
+            <a href="https://www.linkedin.com/in/kartik-singh-4b2401380/" target="_blank" class="nav-social" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+            <a href="https://github.com/Kartikrathore9090" target="_blank" class="nav-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero__badge"><span class="pulse-dot"></span> Vision Transformer Model</div>
+        <h1>Detect <span class="gradient-text">Deepfakes</span><br>Instantly</h1>
+        <p>Upload any image and our AI will analyze it using state&#8209;of&#8209;the&#8209;art Vision Transformers to determine its authenticity.</p>
+    </section>
+
+    <div class="main-card" id="main-card">
+        <form method="POST" enctype="multipart/form-data" onsubmit="startAnalysis()" id="upload-form">
+            <div class="upload-zone" id="upload-zone">
+                <div class="upload-zone__icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <div class="upload-zone__title">Drop your image here</div>
+                <div class="upload-zone__subtitle">or click to browse &middot; JPG, PNG, WEBP</div>
+                <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required id="file-input">
+            </div>
+            <div class="preview-wrapper" id="previewWrapper">
+                <div class="scan-beam"></div>
+                <img id="preview" src="" alt="Image preview">
+            </div>
+            <button type="submit" class="btn-analyze" id="btn-analyze"><i class="fa-solid fa-shield-halved"></i> Analyze Image</button>
+        </form>
+
+        {% if result %}
+        <div class="results" id="results-section">
+            <div class="results__divider"></div>
+            {% if result == "REAL IMAGE" %}
+            <div class="verdict verdict--real" id="verdict-badge"><div class="verdict__icon"><i class="fa-solid fa-circle-check"></i></div> Authentic Image</div>
+            {% else %}
+            <div class="verdict verdict--fake" id="verdict-badge"><div class="verdict__icon"><i class="fa-solid fa-triangle-exclamation"></i></div> Deepfake Detected</div>
+            {% endif %}
+            <div class="confidence-card" id="confidence-card">
+                <div class="confidence-card__label">
+                    <span class="confidence-card__title">Confidence Score</span>
+                    <span class="confidence-card__value {% if result == 'REAL IMAGE' %}confidence-card__value--real{% else %}confidence-card__value--fake{% endif %}" id="conf-value">{{ (confidence*100)|round(2) }}%</span>
+                </div>
+                <div class="progress-track"><div class="progress-bar {% if result == 'REAL IMAGE' %}progress-bar--real{% else %}progress-bar--fake{% endif %}" id="progress-bar" style="width:{{ (confidence*100)|round(2) }}%"></div></div>
+            </div>
+            {% if output_image %}
+            <div class="analysis-section">
+                <div class="analysis-section__title"><i class="fa-solid fa-crosshairs"></i> Suspicious Region Analysis</div>
+                <img src="{{ output_image }}" alt="Analysis result" class="analysis-img" id="analysis-image">
+            </div>
+            {% endif %}
+            <div class="feedback-section">
+                <div class="feedback-section__title"><i class="fa-solid fa-message"></i> Was the prediction correct?</div>
+                <div class="yn-grid">
+                    <button type="button" class="yn-btn" id="yesBtn" onclick="setFeedback('yes')"><i class="fa-solid fa-thumbs-up"></i> Yes</button>
+                    <button type="button" class="yn-btn" id="noBtn" onclick="setFeedback('no')"><i class="fa-solid fa-thumbs-down"></i> No</button>
+                </div>
+                <form method="POST" action="/feedback" id="feedback-form">
+                    <input type="hidden" name="prediction_correct" id="feedbackValue" required>
+                    <input type="text" name="name" placeholder="Your name" required class="form-input" id="input-name">
+                    <div class="star-rating-container">
+                        <span class="star-rating-label">Rating</span>
+                        <div class="stars">
+                            <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+                            <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+                            <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+                            <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+                            <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+                        </div>
+                    </div>
+                    <textarea name="message" placeholder="Optional comments..." class="form-input" id="input-message"></textarea>
+                    <button type="submit" class="btn-submit" id="btn-submit-feedback"><i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i> Submit Feedback</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">Built with <span>♥</span> by GenZ Coders &middot; Powered by HuggingFace Transformers</div>
+</div>
+
+<script>
+function previewImage(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();const wrapper=document.getElementById('previewWrapper');const preview=document.getElementById('preview');const zone=document.getElementById('upload-zone');reader.onload=function(e){preview.src=e.target.result;wrapper.classList.add('visible');zone.style.display='none'};reader.readAsDataURL(file)}
+const uploadZone=document.getElementById('upload-zone');if(uploadZone){['dragenter','dragover'].forEach(evt=>{uploadZone.addEventListener(evt,e=>{e.preventDefault();uploadZone.classList.add('drag-over')})});['dragleave','drop'].forEach(evt=>{uploadZone.addEventListener(evt,e=>{e.preventDefault();uploadZone.classList.remove('drag-over')})})}
+function startAnalysis(){const wrapper=document.getElementById('previewWrapper');if(wrapper)wrapper.classList.add('scanning')}
+function setFeedback(value){document.getElementById('feedbackValue').value=value;const yesBtn=document.getElementById('yesBtn');const noBtn=document.getElementById('noBtn');yesBtn.classList.remove('selected-yes');noBtn.classList.remove('selected-no');if(value==='yes')yesBtn.classList.add('selected-yes');else noBtn.classList.add('selected-no')}
+window.addEventListener('DOMContentLoaded',()=>{const bar=document.getElementById('progress-bar');if(bar){const target=bar.style.width;bar.style.width='0%';setTimeout(()=>{bar.style.width=target},200)}});
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History Scan | TruthLens AI</title>
+    <meta name="description" content="Browse scan history, detect behavioral patterns, and view credibility scores.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{--font:'Nunito',sans-serif;--yellow:#f5b731;--yellow-light:#fff3cd;--yellow-dim:rgba(245,183,49,.12);--yellow-dark:#d4960a;--gold:#e8a317;--success:#4aba6a;--success-dim:rgba(74,186,106,.10);--danger:#e05555;--danger-dim:rgba(224,85,85,.10);--info:#5b9bd5;--info-dim:rgba(91,155,213,.10);--bg:#fdf8ef;--surface-0:#ffffff;--surface-1:#fffcf5;--surface-2:#faf5ea;--surface-3:#f3ecdb;--border:#f0e6d0;--border-hover:#e0d4b8;--text-primary:#2d2a24;--text-secondary:#6b6560;--text-muted:#a09888;--radius-sm:14px;--radius-md:20px;--radius-lg:28px;--radius-xl:36px;--shadow-soft:0 4px 24px rgba(200,180,130,.10);--shadow-card:0 8px 40px rgba(200,180,130,.12)}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.6}
+        .bubble{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+        .bubble--1{width:300px;height:300px;background:radial-gradient(circle,rgba(245,183,49,.09),transparent 70%);top:-60px;right:-40px;animation:floatB 20s ease-in-out infinite alternate}
+        .bubble--2{width:220px;height:220px;background:radial-gradient(circle,rgba(245,183,49,.07),transparent 70%);bottom:8%;left:-60px;animation:floatB 17s ease-in-out infinite alternate-reverse}
+        @keyframes floatB{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.05)}100%{transform:translate(-10px,10px) scale(.97)}}
+        .page-wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:36px 20px 60px}
+
+        .navbar{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--radius-xl);margin-bottom:36px;box-shadow:var(--shadow-soft);animation:fadeDown .6s ease-out}
+        .navbar__brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none;color:var(--text-primary)}
+        .navbar__logo{width:36px;height:36px;background:linear-gradient(135deg,var(--yellow),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 12px rgba(245,183,49,.25)}
+        .navbar__nav{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+        .navbar__nav a{padding:7px 14px;border-radius:99px;color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:700;transition:all .25s;border:1.5px solid transparent}
+        .navbar__nav a:hover{color:var(--text-primary);background:var(--surface-2)}
+        .navbar__nav a.active{color:var(--yellow-dark);background:var(--yellow-light);border-color:rgba(245,183,49,.3)}
+
+        .hero{text-align:center;margin-bottom:32px;animation:fadeUp .7s ease-out}
+        .hero__badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:var(--yellow-light);border:1.5px solid rgba(245,183,49,.3);border-radius:99px;font-size:11px;font-weight:800;color:var(--yellow-dark);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+        .hero h1{font-size:clamp(24px,4.5vw,36px);font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
+        .hero p{font-size:14px;color:var(--text-secondary);max-width:480px;margin:0 auto}
+
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;width:100%;max-width:1100px;margin-bottom:28px;animation:fadeUp .8s ease-out}
+        .stat-card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-soft);transition:all .2s}
+        .stat-card:hover{border-color:var(--border-hover);transform:translateY(-2px)}
+        .stat-card__label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+        .stat-card__value{font-size:28px;font-weight:900;color:var(--text-primary)}
+        .stat-card__sub{font-size:11px;color:var(--text-secondary);margin-top:4px}
+
+        .cred-gauge{width:100%;max-width:1100px;background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:28px;box-shadow:var(--shadow-soft)}
+        .cred-gauge__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+        .cred-gauge__title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary)}
+        .cred-gauge__score{font-size:24px;font-weight:900}
+        .cred-track{height:10px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+        .cred-bar{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.15,.85,.35,1)}
+
+        .insights{width:100%;max-width:1100px;display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+        .insight-card{background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-soft)}
+        .insight-card__title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+        .insight-item{display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px;transition:all .2s}
+        .insight-item:hover{border-color:var(--border-hover)}
+        .insight-item__icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+        .insight-item--warning .insight-item__icon{background:var(--yellow-dim);color:var(--yellow-dark)}
+        .insight-item--positive .insight-item__icon{background:var(--success-dim);color:var(--success)}
+        .insight-item--info .insight-item__icon{background:var(--info-dim);color:var(--info)}
+        .insight-item__label{font-size:13px;font-weight:700}
+        .insight-item__desc{font-size:11px;color:var(--text-muted);margin-top:2px}
+        .insight-empty{color:var(--text-muted);font-size:12px;font-style:italic}
+
+        .timeline-card{width:100%;max-width:1100px;background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:28px;box-shadow:var(--shadow-soft)}
+        .timeline-card__title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+        .timeline-bars{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;height:100px}
+        .timeline-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+        .timeline-day__bars{display:flex;gap:3px;align-items:flex-end;height:70px;width:100%}
+        .timeline-day__bar{flex:1;border-radius:6px 6px 0 0;min-height:2px;transition:height .6s ease}
+        .timeline-day__bar--real{background:var(--success)}
+        .timeline-day__bar--fake{background:var(--danger)}
+        .timeline-day__label{font-size:10px;color:var(--text-muted);font-weight:700}
+        .timeline-day__count{font-size:10px;color:var(--text-secondary);font-weight:800}
+
+        .history-table{width:100%;max-width:1100px;background:var(--surface-0);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-soft)}
+        .history-table__title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+        .h-table{width:100%;border-collapse:collapse}
+        .h-table th{text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:8px 10px;border-bottom:1.5px solid var(--border)}
+        .h-table td{padding:10px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+        .h-table tr:hover td{background:var(--surface-2)}
+        .badge{padding:4px 10px;border-radius:99px;font-size:10px;font-weight:800;display:inline-block}
+        .badge--real{background:var(--success-dim);color:var(--success)}
+        .badge--fake{background:var(--danger-dim);color:var(--danger)}
+        .badge--emotion{background:var(--info-dim);color:var(--info)}
+        .badge--age{background:var(--yellow-dim);color:var(--yellow-dark)}
+        .empty-state{text-align:center;padding:50px 20px;color:var(--text-muted)}
+        .empty-state i{font-size:40px;margin-bottom:14px;display:block;opacity:.3}
+        .footer{margin-top:48px;text-align:center;color:var(--text-muted);font-size:12px}
+        .footer span{color:var(--yellow-dark)}
+        @keyframes fadeDown{0%{opacity:0;transform:translateY(-14px)}100%{opacity:1;transform:translateY(0)}}
+        @keyframes fadeUp{0%{opacity:0;transform:translateY(16px)}100%{opacity:1;transform:translateY(0)}}
+        @media(max-width:768px){.insights{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}.navbar{padding:10px 16px}.navbar__nav a{padding:5px 9px;font-size:11px}}
+    </style>
+</head>
+<body>
+<div class="bubble bubble--1"></div>
+<div class="bubble bubble--2"></div>
+<div class="page-wrapper">
+    <nav class="navbar">
+        <a href="/" class="navbar__brand"><div class="navbar__logo">🔍</div><span>TruthLens<span style="color:var(--yellow-dark)">AI</span></span></a>
+        <div class="navbar__nav">
+            <a href="/"><i class="fa-solid fa-shield-halved"></i> Detect</a>
+            <a href="/history" class="active"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+            <a href="/emotion"><i class="fa-solid fa-face-smile"></i> Emotion</a>
+            <a href="/age"><i class="fa-solid fa-user-clock"></i> Age</a>
+            <a href="/video-analysis"><i class="fa-solid fa-video"></i> Video</a>
+            <a href="/datasets"><i class="fa-solid fa-database"></i> Datasets</a>
+            <a href="/events"><i class="fa-solid fa-chart-line"></i> Events</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="hero__badge"><i class="fa-solid fa-clock-rotate-left"></i> Audit Trail</div>
+        <h1>History Scan</h1>
+        <p>Behavioral patterns, anomalies, and credibility scores for every session.</p>
+    </section>
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card__label">Total Scans</div><div class="stat-card__value">{{ stats.total_scans }}</div></div>
+        <div class="stat-card"><div class="stat-card__label">Real Images</div><div class="stat-card__value">{{ stats.real_count }}</div><div class="stat-card__sub">Authentic images detected</div></div>
+        <div class="stat-card"><div class="stat-card__label">Deepfakes</div><div class="stat-card__value">{{ stats.fake_count }}</div><div class="stat-card__sub">Manipulated images detected</div></div>
+        <div class="stat-card"><div class="stat-card__label">Avg Confidence</div><div class="stat-card__value">{{ stats.avg_confidence }}%</div></div>
+    </div>
+    <div class="cred-gauge">
+        <div class="cred-gauge__header">
+            <span class="cred-gauge__title"><i class="fa-solid fa-shield-halved" style="color:var(--yellow-dark)"></i> Session Credibility Score</span>
+            <span class="cred-gauge__score" style="color:{% if stats.credibility_score >= 80 %}var(--success){% elif stats.credibility_score >= 50 %}var(--yellow-dark){% else %}var(--danger){% endif %}">{{ stats.credibility_score }}%</span>
+        </div>
+        <div class="cred-track"><div class="cred-bar" id="credBar" style="width:{{ stats.credibility_score }}%;background:{% if stats.credibility_score >= 80 %}var(--success){% elif stats.credibility_score >= 50 %}var(--yellow){% else %}var(--danger){% endif %}"></div></div>
+    </div>
+    <div class="insights">
+        <div class="insight-card">
+            <div class="insight-card__title"><i class="fa-solid fa-chart-bar" style="color:var(--yellow-dark)"></i> Behavioral Patterns</div>
+            {% if stats.patterns %}{% for p in stats.patterns %}
+            <div class="insight-item insight-item--{{ p.severity }}"><div class="insight-item__icon"><i class="fa-solid {{ p.icon }}"></i></div><div><div class="insight-item__label">{{ p.label }}</div><div class="insight-item__desc">{{ p.description }}</div></div></div>
+            {% endfor %}{% else %}<div class="insight-empty">Not enough data yet — keep scanning to see patterns.</div>{% endif %}
+        </div>
+        <div class="insight-card">
+            <div class="insight-card__title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--yellow-dark)"></i> Anomalies</div>
+            {% if stats.anomalies %}{% for a in stats.anomalies %}
+            <div class="insight-item insight-item--{{ a.severity }}"><div class="insight-item__icon"><i class="fa-solid {{ a.icon }}"></i></div><div><div class="insight-item__label">{{ a.label }}</div><div class="insight-item__desc">{{ a.description }}</div></div></div>
+            {% endfor %}{% else %}<div class="insight-empty">No anomalies detected — everything looks normal.</div>{% endif %}
+        </div>
+    </div>
+    <div class="timeline-card">
+        <div class="timeline-card__title"><i class="fa-solid fa-chart-area" style="color:var(--yellow-dark)"></i> 7-Day Activity</div>
+        <div class="timeline-bars">{% for day in stats.timeline %}
+            <div class="timeline-day"><div class="timeline-day__bars"><div class="timeline-day__bar timeline-day__bar--real" style="height:{% if day.real %}{{ [day.real * 20, 80] | min }}px{% else %}2px{% endif %}"></div><div class="timeline-day__bar timeline-day__bar--fake" style="height:{% if day.fake %}{{ [day.fake * 20, 80] | min }}px{% else %}2px{% endif %}"></div></div><div class="timeline-day__count">{{ day.total }}</div><div class="timeline-day__label">{{ day.label }}</div></div>
+        {% endfor %}</div>
+    </div>
+    <div class="history-table">
+        <div class="history-table__title"><i class="fa-solid fa-list" style="color:var(--yellow-dark)"></i> Scan Log</div>
+        {% if history %}
+        <table class="h-table"><thead><tr><th>#</th><th>Type</th><th>Result</th><th>Confidence</th><th>Timestamp</th></tr></thead><tbody>
+            {% for h in history %}<tr>
+                <td>{{ h.id|default(loop.index) }}</td>
+                <td>{% if h.type == 'deepfake' %}<span class="badge badge--real">Deepfake Scan</span>{% elif h.type == 'emotion' %}<span class="badge badge--emotion">Emotion</span>{% elif h.type == 'age' %}<span class="badge badge--age">Age</span>{% else %}<span class="badge">{{ h.type }}</span>{% endif %}</td>
+                <td>{% if h.result == 'REAL IMAGE' %}<span class="badge badge--real">✔ Real</span>{% elif h.result == 'DEEPFAKE IMAGE' %}<span class="badge badge--fake">⚠ Fake</span>{% elif h.primary_emotion %}<span>{{ h.primary_emotion }}</span>{% elif h.estimated_age %}<span>Age ~{{ h.estimated_age }}</span>{% else %}—{% endif %}</td>
+                <td>{{ (h.confidence * 100) | round(1) if h.confidence else '—' }}%</td>
+                <td style="font-size:11px;color:var(--text-muted)">{{ h.timestamp[:19] if h.timestamp else '—' }}</td>
+            </tr>{% endfor %}
+        </tbody></table>
+        {% else %}<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>No scans yet. Go to <a href="/" style="color:var(--yellow-dark)">Detect</a> and analyze an image to get started.</p></div>{% endif %}
+    </div>
+    <div class="footer">Built with <span>♥</span> by Kartik Singh &middot; TruthLens AI</div>
+</div>
+<script>window.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('credBar');if(b){const t=b.style.width;b.style.width='0%';setTimeout(()=>{b.style.width=t},200)}});</script>
+</body>
+</html>

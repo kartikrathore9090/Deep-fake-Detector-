@@ -1,2 +1,35 @@
-# Deep-fake-Detector-
-A web-based AI application that detects whether an uploaded image is real or AI-generated (deepfake) using a pretrained deep learning model. The system processes images through a Flask backend, performs model inference, and displays prediction results with confidence scores and highlighted suspicious regions.
+# AI Deepfake Image Detector
+
+This project detects AI-generated (deepfake) images using a pretrained deep learning model.
+
+## Features
+- Upload image through web interface
+- Deep learning inference using Transformers
+- Confidence score visualization
+- Suspicious region detection
+- Flask backend + web UI
+
+## Tech Stack
+Python
+Flask
+PyTorch
+Transformers
+OpenCV
+HTML/CSS
+
+## How It Works
+
+Upload Image
+      ↓
+Preprocessing
+      ↓
+AI Model Prediction
+      ↓
+Confidence Score
+      ↓
+Result Display
+
+## Run Locally
+
+pip install -r requirements.txt
+python app.py
