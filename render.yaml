@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: truthlens-ai
+    env: docker
+    plan: free # Note: The free tier spins down after inactivity. ML models may require a paid tier for enough RAM.
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: KAFKA_ENABLED
+        value: "false" # Set to false unless you deploy a Kafka cluster as well
+      - key: PORT
+        value: "7860"
